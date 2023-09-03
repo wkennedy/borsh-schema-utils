@@ -6,10 +6,10 @@ These are two libraries that provide additional utility for serializing and dese
 BorshSchemaContainer. Use cases where this is useful include when you want to serialize/deserialize data where you might
 not know the schema ahead of time, or are not able to use create or compile code to support the serialized data.
 
-[borsh-schema-writer](./borsh-schema-writer/) - [README](./borsh-schema-writer/README.md)
+[borsh-schema-writer](./borsh-schema-writer/) - [README](./borsh-schema-writer/README.md) - [crates.io](https://crates.io/crates/borsh-schema-writer)
 
 
-[borsh-serde-adapter](./borsh-serde-adapter/) - [README](./borsh-serde-adapter/README.md)
+[borsh-serde-adapter](./borsh-serde-adapter/) - [README](./borsh-serde-adapter/README.md) - [crates.io](https://crates.io/crates/borsh-serde-adapter)
 
 
 For example uses, please see the integration_test files in each library.
