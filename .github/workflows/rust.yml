@@ -18,23 +18,40 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+      env:
+        CARGO_INCREMENTAL: '0'
+        RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
+        RUSTDOCFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
+    - name: rust-grcov
+      uses: actions-rs/grcov@v0.1
+    - name: Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      with:
+        # Repository upload token - get it from codecov.io. Required only for private repositories
+        token: ${{ secrets.CODECOV_TOKEN }}
+        # Specify whether the Codecov output should be verbose
+        verbose: true
+        fail_ci_if_error: true
 
-  test:
-    name: coverage
-    runs-on: ubuntu-latest
-    container:
-      image: xd009642/tarpaulin:develop-nightly
-      options: --security-opt seccomp=unconfined
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Generate code coverage
-        run: |
-          cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out json
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+#  test:
+#    name: coverage
+#    runs-on: ubuntu-latest
+#    container:
+#      image: xd009642/tarpaulin:develop-nightly
+#      options: --security-opt seccomp=unconfined
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#      - name: Generate code coverage
+#        run: |
+#          cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out json
+#      - name: Upload coverage reports to Codecov
+#        uses: codecov/codecov-action@v3
+#        env:
+#          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   clippy:
     name: clippy
