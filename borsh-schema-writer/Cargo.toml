@@ -1,0 +1,17 @@
+[package]
+name = "borsh-schema-writer"
+version = "0.1.0"
+edition = "2021"
+authors = ["Will Kennedy"]
+description = "Write a BorshSchemaContainer to a binary file"
+repository = "https://github.com/wkennedy/borsh-schema-utils"
+license = "MIT"
+readme = "README.md"
+exclude=["/tests", "/examples", "/benches", "/docs", "/target", "/.github", "/.gitignore", "/.gitattributes", "/.gitmodules", "/.travis.yml", "/.cargo-ok", "/.git", "/.idea"]
+
+[dependencies]
+borsh = ">= 0.9.3, <= 0.10.3"
+borsh-derive = ">= 0.9.3, <= 0.10.3"
+
+[lib]
+doctest = false

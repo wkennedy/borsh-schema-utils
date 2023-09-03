@@ -1,0 +1,1 @@
+{"declaration":"Person","definitions":[["Person",{"Struct":{"fields":{"NamedFields":[[["first_name","string"],["last_name","string"]]]}}}]]}

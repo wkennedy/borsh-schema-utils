@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "borsh-serde-adapter",
+    "borsh-schema-writer"
+]

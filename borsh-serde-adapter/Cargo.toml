@@ -1,0 +1,26 @@
+[package]
+name = "borsh-serde-adapter"
+version = "0.1.0"
+edition = "2021"
+authors = ["Will Kennedy"]
+description = "Adapter to go from borsh to serde and vice versa"
+license = "MIT"
+repository = "https://github.com/wkennedy/borsh-schema-utils"
+readme = "README.md"
+keywords = ["serde", "borsh", "serialization"]
+categories = ["serialization", "deserialization"]
+exclude=["/tests", "/examples", "/benches", "/docs", "/target", "/.github", "/.gitignore", "/.gitattributes", "/.gitmodules", "/.travis.yml", "/.cargo-ok", "/.git", "/.idea"]
+
+[dependencies]
+log = "0.4.19"
+serde = { version = "1.0.171", features = ["derive"] }
+serde_derive = "1.0.180"
+serde_json = "1.0.104"
+anyhow = "1.0.72"
+simdutf8 = { version = "0.1.4", optional = true }
+borsh = ">= 0.9.3, <= 0.10.3"
+borsh-derive = ">= 0.9.3, <= 0.10.3"
+thiserror = "1.0.44"
+
+[lib]
+doctest = false
