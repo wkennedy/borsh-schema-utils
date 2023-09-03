@@ -7,7 +7,7 @@ description = "Adapter to go from borsh to serde and vice versa"
 license = "MIT"
 repository = "https://github.com/wkennedy/borsh-schema-utils"
 readme = "README.md"
-keywords = ["serde", "borsh", "serialization"]
+keywords = ["serde", "borsh", "serialization", "json"]
 categories = ["serialization", "deserialization"]
 exclude=["/tests", "/examples", "/benches", "/docs", "/target", "/.github", "/.gitignore", "/.gitattributes", "/.gitmodules", "/.travis.yml", "/.cargo-ok", "/.git", "/.idea"]
 
