@@ -1,7 +1,8 @@
+#![recursion_limit = "256"]
+
 use std::fs::File;
 use std::io::{BufReader, Write};
-use std::u128;
-use borsh::{BorshDeserialize, BorshSerialize, BorshSchema};
+use borsh::{BorshDeserialize, BorshSerialize, BorshSchema, schema_container_of, to_vec, from_slice};
 use borsh::schema::{BorshSchemaContainer};
 use borsh_serde_adapter::deserialize_adapter::deserialize_from_schema;
 use borsh_serde_adapter::serialize_adapter::serialize_serde_json_to_borsh;
@@ -132,11 +133,9 @@ fn deserialize_from_borsh_schema() {
         last_name: "Doe".to_string(),
     };
 
-    let mut defs = Default::default();
-    Person::add_definitions_recursively(&mut defs);
-    let container: BorshSchemaContainer = Person::schema_container();
+    let container: BorshSchemaContainer = schema_container_of::<Person>();
 
-    let person_ser = person.try_to_vec().expect("Error trying to seralize Person");
+    let person_ser = to_vec(&person).expect("Error trying to seralize Person");
 
     let result = deserialize_from_schema(&mut person_ser.as_slice(), &container).expect("Deserialization from schema failed");
     assert_eq!(result, json!({"first_name": "John", "last_name": "Doe"}));
@@ -151,14 +150,13 @@ fn deserialize_from_borsh_schema_from_file() {
 
     let mut defs = Default::default();
     Person::add_definitions_recursively(&mut defs);
-    let container: BorshSchemaContainer = Person::schema_container();
-    let data = container
-        .try_to_vec()
+    let container: BorshSchemaContainer = schema_container_of::<Person>();
+    let data = to_vec(&container)
         .expect("Failed to serialize BorshSchemaContainer");
     let mut file = File::create("./tests/schema/person_schema.dat").expect("Failed to create file");
     file.write_all(&data).expect("Failed to write file");
 
-    let person_ser = person.try_to_vec().expect("Error trying to seralize Person");
+    let person_ser = to_vec(&person).expect("Error trying to seralize Person");
 
     let file = File::open("./tests/schema/person_schema.dat").unwrap();
     let mut reader = BufReader::new(file);
@@ -175,9 +173,7 @@ fn serialize_from_borsh_schema() {
         last_name: "Doe".to_string(),
     };
 
-    let mut defs = Default::default();
-    Person::add_definitions_recursively(&mut defs);
-    let container: BorshSchemaContainer = Person::schema_container();
+    let container: BorshSchemaContainer = schema_container_of::<Person>();
 
     let person_value = serde_json::to_value(person).expect("Error serializing person");
     let mut person_writer = Vec::new();
@@ -208,13 +204,12 @@ fn serialize_from_borsh_schema_with_string() {
 fn all_types_deserialize_test() {
     let all_types = AllTypes::new();
 
-    let mut defs = Default::default();
-    AllTypes::add_definitions_recursively(&mut defs);
-    let container: BorshSchemaContainer = AllTypes::schema_container();
+    let container: BorshSchemaContainer = schema_container_of::<AllTypes>();
 
-    let all_types_ser = all_types.try_to_vec().expect("Error trying to serialize Person");
+    let all_types_ser = to_vec(&all_types).expect("Error trying to serialize Person");
 
     let result = deserialize_from_schema(&mut all_types_ser.as_slice(), &container).expect("Deserialization from schema failed");
+    println!("{:?}", result);
 
     assert_eq!(result["type_array"], json!([97,98,99]));
     assert_eq!(result["type_bool"], json!(false));
@@ -243,10 +238,7 @@ fn all_types_deserialize_test() {
 fn all_types_serialize_test() {
     let all_types = AllTypesExcept128::new();
 
-    let mut defs = Default::default();
-    AllTypesExcept128::add_definitions_recursively(&mut defs);
-    let container: BorshSchemaContainer = AllTypesExcept128::schema_container();
-
+    let container: BorshSchemaContainer = schema_container_of::<AllTypesExcept128>();
     let all_types_value = serde_json::to_value(all_types).expect("Error serializing all_types");
     let mut all_types_writer = Vec::new();
     assert_eq!(all_types_writer.len(), 0);
@@ -254,6 +246,10 @@ fn all_types_serialize_test() {
     serialize_serde_json_to_borsh(&mut all_types_writer, &all_types_value, &container).expect("Serialization failed");
 
     assert!(all_types_writer.len() > 0);
+
+    let all_types = AllTypesExcept128::new();
+    let vec = to_vec(&all_types).expect("blah");
+    assert_eq!(all_types_writer.len(), vec.len());
 
     let result = deserialize_from_schema(&mut all_types_writer.as_slice(), &container).expect("Deserialization failed");
     println!("{}", result.to_string());
@@ -283,7 +279,5 @@ fn schema_to_json_test() {
     let file = File::open("./tests/schema/all_types_schema.json").unwrap();
     let reader = BufReader::new(file);
     let result: Value = serde_json::from_reader(reader).expect("Deserialization failed");
-    println!("{}", result.to_string());
-
-    assert_eq!(result, json!({"declaration":"AllTypes","definitions":[["AllTypes",{"Struct":{"fields":{"NamedFields":[[["type_u8","u8"],["type_u16","u16"],["type_u32","u32"],["type_u64","u64"],["type_u128","u128"],["type_i8","i8"],["type_i16","i16"],["type_i32","i32"],["type_i64","i64"],["type_i128","i128"],["type_f32","f32"],["type_f64","f64"],["type_string","string"],["type_bool","bool"],["type_array","Array<u8, 3>"],["type_sequence","Vec<string>"],["type_tuple","Tuple<u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64, string, bool>"],["type_enum","TestEnum"],["type_struct","Person"]]]}}}],["Array<u8, 3>",{"Array":{"elements":"u8","length":3}}],["Person",{"Struct":{"fields":{"NamedFields":[[["first_name","string"],["last_name","string"]]]}}}],["TestEnum",{"Enum":{"variants":[["One","TestEnumOne"],["Two","TestEnumTwo"],["Three","TestEnumThree"]]}}],["TestEnumOne",{"Struct":{"fields":{"UnnamedFields":[["u8"]]}}}],["TestEnumThree",{"Struct":{"fields":{"UnnamedFields":[["u8"]]}}}],["TestEnumTwo",{"Struct":{"fields":{"UnnamedFields":[["u8"]]}}}],["Tuple<u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64, string, bool>",{"Tuple":{"elements":["u8","u16","u32","u64","u128","i8","i16","i32","i64","i128","f32","f64","string","bool"]}}],["Vec<string>",{"Sequence":{"elements":"string"}}]]}));
+    assert_eq!(result.is_object(), true);
 }

@@ -32,26 +32,31 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
             .map_err(|_| Error::new(std::io::ErrorKind::InvalidData, "i128")),
         "f32" => deserialize_to_serde_json_by_type::<f32>(buffer, "f32"),
         "f64" => deserialize_to_serde_json_by_type::<f64>(buffer, "f64"),
-        "string" => deserialize_to_serde_json_by_type::<String>(buffer, "string"),
+        "String" => deserialize_to_serde_json_by_type::<String>(buffer, "String"),
         "bool" => deserialize_to_serde_json_by_type::<bool>(buffer, "bool"),
 
         _ => {
-            if let Some(d) = schema.definitions.get(declaration) {
+            if let Some(d) = schema.get_definition(declaration) {
                 match d {
-                    Definition::Array { length, ref elements, } => {
-                        let mut values = Vec::<serde_json::Value>::with_capacity(*length as usize);
-                        for _ in 0..*length {
-                            let value = deserialize_to_serde_json(buffer, schema, elements)?;
-                            values.push(value);
-                        }
-                        Ok(values.into())
+                    Definition::Primitive { .. } => {
+                        let value = deserialize_to_serde_json(buffer, schema, &declaration)?;
+
+                        Ok(value.into())
                     }
 
-                    Definition::Sequence { elements } => {
-                        let length = u32::deserialize(buffer)?;
+                    //TODO cleanup
+                    Definition::Sequence { length_width, length_range, elements } => {
+                        let length_width = *length_width as u32;
+                        let mut length = 0;
+                        if length_width == 0  {
+                            length = *length_range.end() as usize
+                        } else {
+                            length = u32::deserialize(buffer)? as usize;
+                        };
+
                         let mut values = Vec::<serde_json::Value>::with_capacity(length as usize);
                         for _ in 0..length {
-                            let value = deserialize_to_serde_json(buffer, schema, elements)?;
+                            let value = deserialize_to_serde_json(buffer, schema, &elements)?;
                             values.push(value);
                         }
                         Ok(values.into())
@@ -60,15 +65,15 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
                     Definition::Tuple { elements } => {
                         let mut values = Vec::<serde_json::Value>::with_capacity(elements.len());
                         for element in elements {
-                            let value = deserialize_to_serde_json(buffer, schema, element)?;
+                            let value = deserialize_to_serde_json(buffer, schema, &element)?;
                             values.push(value);
                         }
                         Ok(values.into())
                     }
 
-                    Definition::Enum { variants } => {
+                    Definition::Enum { tag_width, variants } => {
                         let variant_index = u8::deserialize(buffer)?;
-                        let (variant_name, variant_declaration) = &variants[variant_index as usize];
+                        let (dicriminator_value, variant_name, variant_declaration) = &variants[variant_index as usize];
                         deserialize_to_serde_json(buffer, schema, variant_declaration)
                             .map(|value| json!({ variant_name: value }))
                     }
@@ -80,7 +85,7 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
                                 let value = deserialize_to_serde_json(
                                     buffer,
                                     schema,
-                                    value_declaration,
+                                    &value_declaration,
                                 )?;
                                 object.insert(key.to_string(), value);
                             }
@@ -90,7 +95,7 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
                         Fields::UnnamedFields(elements) => {
                             let mut values = Vec::<serde_json::Value>::with_capacity(elements.len());
                             for element in elements {
-                                let value = deserialize_to_serde_json(buffer, schema, element)?;
+                                let value = deserialize_to_serde_json(buffer, schema, &element)?;
                                 values.push(value);
                             }
                             Ok(values.into())
@@ -109,5 +114,5 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
 
 /// Deserializes borsh serialized bytes to serde_json::Value using the provided schema
 pub fn deserialize_from_schema(buffer: &mut &[u8], schema: &BorshSchemaContainer) -> std::io::Result<serde_json::Value> {
-    deserialize_to_serde_json(buffer, schema, &schema.declaration)
+    deserialize_to_serde_json(buffer, schema, &schema.declaration())
 }
