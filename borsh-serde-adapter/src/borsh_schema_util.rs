@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{Write};
-use borsh::{BorshSchema, BorshSerialize, schema_container_of, to_vec};
+use borsh::{BorshSchema, schema_container_of, to_vec};
 use borsh::schema::BorshSchemaContainer;
 use crate::deserialize_adapter::deserialize_from_schema;
 
