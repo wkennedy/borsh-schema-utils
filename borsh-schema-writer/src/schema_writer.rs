@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::Write;
 use borsh::{BorshSchema, to_vec};
 use borsh::schema::BorshSchemaContainer;
-use borsh::schema::*;
 
 /// This function takes a Struct with the BorshSchema trait and writes the schema to a specified file.
 ///```rust
