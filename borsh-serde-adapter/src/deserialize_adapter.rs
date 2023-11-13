@@ -39,9 +39,9 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
             if let Some(d) = schema.get_definition(declaration) {
                 match d {
                     Definition::Primitive { .. } => {
-                        let value = deserialize_to_serde_json(buffer, schema, &declaration)?;
+                        let value = deserialize_to_serde_json(buffer, schema, declaration)?;
 
-                        Ok(value.into())
+                        Ok(value)
                     }
 
                     //TODO cleanup
@@ -54,9 +54,9 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
                             length = u32::deserialize(buffer)? as usize;
                         };
 
-                        let mut values = Vec::<serde_json::Value>::with_capacity(length as usize);
+                        let mut values = Vec::<serde_json::Value>::with_capacity(length);
                         for _ in 0..length {
-                            let value = deserialize_to_serde_json(buffer, schema, &elements)?;
+                            let value = deserialize_to_serde_json(buffer, schema, elements)?;
                             values.push(value);
                         }
                         Ok(values.into())
@@ -65,15 +65,15 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
                     Definition::Tuple { elements } => {
                         let mut values = Vec::<serde_json::Value>::with_capacity(elements.len());
                         for element in elements {
-                            let value = deserialize_to_serde_json(buffer, schema, &element)?;
+                            let value = deserialize_to_serde_json(buffer, schema, element)?;
                             values.push(value);
                         }
                         Ok(values.into())
                     }
 
-                    Definition::Enum { tag_width, variants } => {
+                    Definition::Enum { tag_width: _, variants } => {
                         let variant_index = u8::deserialize(buffer)?;
-                        let (dicriminator_value, variant_name, variant_declaration) = &variants[variant_index as usize];
+                        let (_dicriminator_value, variant_name, variant_declaration) = &variants[variant_index as usize];
                         deserialize_to_serde_json(buffer, schema, variant_declaration)
                             .map(|value| json!({ variant_name: value }))
                     }
@@ -85,7 +85,7 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
                                 let value = deserialize_to_serde_json(
                                     buffer,
                                     schema,
-                                    &value_declaration,
+                                    value_declaration,
                                 )?;
                                 object.insert(key.to_string(), value);
                             }
@@ -95,7 +95,7 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
                         Fields::UnnamedFields(elements) => {
                             let mut values = Vec::<serde_json::Value>::with_capacity(elements.len());
                             for element in elements {
-                                let value = deserialize_to_serde_json(buffer, schema, &element)?;
+                                let value = deserialize_to_serde_json(buffer, schema, element)?;
                                 values.push(value);
                             }
                             Ok(values.into())
@@ -114,5 +114,5 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
 
 /// Deserializes borsh serialized bytes to serde_json::Value using the provided schema
 pub fn deserialize_from_schema(buffer: &mut &[u8], schema: &BorshSchemaContainer) -> std::io::Result<serde_json::Value> {
-    deserialize_to_serde_json(buffer, schema, &schema.declaration())
+    deserialize_to_serde_json(buffer, schema, schema.declaration())
 }

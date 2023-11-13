@@ -10,7 +10,7 @@ use crate::errors::ExpectationError;
 
 /// Serializes serde_json::Value to borsh serialized bytes using the provided schema
 pub fn serialize_serde_json_to_borsh(writer: &mut impl Write, value: &serde_json::Value, schema: &BorshSchemaContainer) -> anyhow::Result<()> {
-    serialize_serde_json_by_declaration_with_schema(writer, value, schema, &schema.declaration())
+    serialize_serde_json_by_declaration_with_schema(writer, value, schema, schema.declaration())
 }
 
 fn serialize_signed_to_borsh<T: BorshSerialize + TryFrom<i64>>(writer: &mut impl Write, value: &serde_json::Value) -> anyhow::Result<()>
@@ -82,7 +82,7 @@ fn serialize_serde_json_by_declaration_with_schema(
                 match definition {
 
                     Definition::Primitive { .. } => {
-                        serialize_serde_json_by_declaration_with_schema(writer, value, schema, &declaration)?;
+                        serialize_serde_json_by_declaration_with_schema(writer, value, schema, declaration)?;
                         Ok(())
                     }
 
@@ -99,7 +99,7 @@ fn serialize_serde_json_by_declaration_with_schema(
                             BorshSerialize::serialize(&(length as u32), writer)?;
                         };
                         for item in sequence {
-                            serialize_serde_json_by_declaration_with_schema(writer, item, schema, &elements)?;
+                            serialize_serde_json_by_declaration_with_schema(writer, item, schema, elements)?;
                         }
                         Ok(())
                     }
@@ -157,7 +157,7 @@ fn serialize_serde_json_by_declaration_with_schema(
                                     writer,
                                     property_value,
                                     schema,
-                                    &value_declaration,
+                                    value_declaration,
                                 )?;
                             }
                             Ok(())
