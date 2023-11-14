@@ -1,3 +1,5 @@
+#![allow(clippy::unnecessary_find_map)]
+
 use std::io::{Write};
 use std::str::FromStr;
 
@@ -86,16 +88,11 @@ fn serialize_serde_json_by_declaration_with_schema(
                         Ok(())
                     }
 
-                    //TODO cleanup
-                    Definition::Sequence { length_width, length_range, elements } => {
+                    Definition::Sequence { length_width, length_range: _, elements } => {
                         let sequence = value.as_array().ok_or(ExpectationError::Array)?;
                         let length_width = *length_width as u32;
-                        let mut length = 0;
-                        if length_width == 0  {
-                            length = *length_range.end() as usize
-                        } else {
-                            //Only serialize length for dynamically sized sequence (vec)
-                            length = sequence.len();
+                        if length_width != 0  {
+                            let length = sequence.len();
                             BorshSerialize::serialize(&(length as u32), writer)?;
                         };
                         for item in sequence {

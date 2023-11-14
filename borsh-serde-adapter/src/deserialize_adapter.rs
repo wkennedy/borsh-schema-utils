@@ -44,14 +44,12 @@ fn deserialize_to_serde_json(buffer: &mut &[u8], schema: &BorshSchemaContainer, 
                         Ok(value)
                     }
 
-                    //TODO cleanup
                     Definition::Sequence { length_width, length_range, elements } => {
                         let length_width = *length_width as u32;
-                        let mut length = 0;
-                        if length_width == 0  {
-                            length = *length_range.end() as usize
+                        let length = if length_width == 0  {
+                            *length_range.end() as usize
                         } else {
-                            length = u32::deserialize(buffer)? as usize;
+                            u32::deserialize(buffer)? as usize
                         };
 
                         let mut values = Vec::<serde_json::Value>::with_capacity(length);
