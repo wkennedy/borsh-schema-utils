@@ -1,6 +1,6 @@
 [package]
 name = "borsh-serde-adapter"
-version = "0.2.0"
+version = "1.0.0"
 edition = "2021"
 authors = ["Will Kennedy"]
 description = "Adapter to go from borsh to serde and vice versa"
