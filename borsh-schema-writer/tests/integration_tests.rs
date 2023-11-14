@@ -18,8 +18,8 @@ fn write_schema_test() {
     let mut reader = BufReader::new(file);
     let container_from_file = BorshSchemaContainer::deserialize_reader(&mut reader).expect("Deserialization for BorshSchemaContainer failed");
 
-    assert_eq!(container_from_file.declaration.to_string(), "Person");
-    let definition = container_from_file.definitions.get(container_from_file.declaration.as_str()).unwrap();
+    assert_eq!(container_from_file.declaration().to_string(), "Person");
+    let definition = container_from_file.get_definition(container_from_file.declaration().as_str()).unwrap();
     assert!(matches!(definition, Definition::Struct { .. }));
 
     match definition {
@@ -27,7 +27,7 @@ fn write_schema_test() {
             Fields::NamedFields(fields) => {
                 for (key, value_declaration) in fields {
                     assert!(key.as_str() == "first_name" || key.as_str() == "last_name");
-                    assert!(value_declaration.as_str() == "string");
+                    assert_eq!(value_declaration.as_str(), "String");
                 }
             }
             _ => {assert!(false)}
@@ -42,8 +42,8 @@ fn write_to_bytes_test() {
 
     let container_from_bytes = BorshSchemaContainer::deserialize(&mut schema.as_slice()).expect("Deserialization for BorshSchemaContainer failed");
 
-    assert_eq!(container_from_bytes.declaration.to_string(), "Person");
-    let definition = container_from_bytes.definitions.get(container_from_bytes.declaration.as_str()).unwrap();
+    assert_eq!(container_from_bytes.declaration().to_string(), "Person");
+    let definition = container_from_bytes.get_definition(container_from_bytes.declaration().as_str()).unwrap();
     assert!(matches!(definition, Definition::Struct { .. }));
 
     match definition {
@@ -51,7 +51,7 @@ fn write_to_bytes_test() {
             Fields::NamedFields(fields) => {
                 for (key, value_declaration) in fields {
                     assert!(key.as_str() == "first_name" || key.as_str() == "last_name");
-                    assert!(value_declaration.as_str() == "string");
+                    assert_eq!(value_declaration.as_str(), "String");
                 }
             }
             _ => {assert!(false)}

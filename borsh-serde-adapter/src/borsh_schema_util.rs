@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{Write};
-use borsh::{BorshSchema, BorshSerialize};
+use borsh::{BorshSchema, schema_container_of, to_vec};
 use borsh::schema::BorshSchemaContainer;
 use crate::deserialize_adapter::deserialize_from_schema;
 
@@ -9,14 +9,12 @@ use crate::deserialize_adapter::deserialize_from_schema;
 pub fn write_schema_as_json<T: BorshSchema>(_: T, file_path: String) -> std::io::Result<()> {
     let mut defs = Default::default();
     T::add_definitions_recursively(&mut defs);
-    let container: BorshSchemaContainer = T::schema_container();
-    let data = container
-        .try_to_vec()
-        .expect("Failed to serialize BorshSchemaContainer");
+    let container: BorshSchemaContainer = BorshSchemaContainer::for_type::<T>();
+    let data = to_vec(&container).expect("Failed to serialize BorshSchemaContainer");
 
     let mut con_defs = Default::default();
     BorshSchemaContainer::add_definitions_recursively(&mut con_defs);
-    let con_container: BorshSchemaContainer = BorshSchemaContainer::schema_container();
+    let con_container: BorshSchemaContainer = schema_container_of::<BorshSchemaContainer>();
 
     let result = deserialize_from_schema(&mut data.as_slice(), &con_container).expect("Deserialization failed");
 

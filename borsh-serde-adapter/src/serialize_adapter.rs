@@ -1,3 +1,5 @@
+#![allow(clippy::unnecessary_find_map)]
+
 use std::io::{Write};
 use std::str::FromStr;
 
@@ -10,7 +12,7 @@ use crate::errors::ExpectationError;
 
 /// Serializes serde_json::Value to borsh serialized bytes using the provided schema
 pub fn serialize_serde_json_to_borsh(writer: &mut impl Write, value: &serde_json::Value, schema: &BorshSchemaContainer) -> anyhow::Result<()> {
-    serialize_serde_json_by_declaration_with_schema(writer, value, schema, &schema.declaration)
+    serialize_serde_json_by_declaration_with_schema(writer, value, schema, schema.declaration())
 }
 
 fn serialize_signed_to_borsh<T: BorshSerialize + TryFrom<i64>>(writer: &mut impl Write, value: &serde_json::Value) -> anyhow::Result<()>
@@ -71,30 +73,28 @@ fn serialize_serde_json_by_declaration_with_schema(
             BorshSerialize::serialize(&value, writer)?;
             Ok(())
         },
-        "string" => serialize_serde_json_to_borsh_by_type::<String>(writer, value),
+        "String" => serialize_serde_json_to_borsh_by_type::<String>(writer, value),
         "bool" => {
             let value = value.as_bool().ok_or(ExpectationError::Boolean)?;
             BorshSerialize::serialize(&value, writer)?;
             Ok(())
         }
         _ => {
-            if let Some(definition) = schema.definitions.get(declaration) {
+            if let Some(definition) = schema.get_definition(declaration) {
                 match definition {
 
-                    Definition::Array { length, elements } => {
-                        let array = value.as_array().ok_or(ExpectationError::Array)?;
-                        if array.len() != *length as usize {
-                            return Err(ExpectationError::ArrayOfLength(*length).into());
-                        }
-                        for value in array {
-                            serialize_serde_json_by_declaration_with_schema(writer, value, schema, elements)?;
-                        }
+                    Definition::Primitive { .. } => {
+                        serialize_serde_json_by_declaration_with_schema(writer, value, schema, declaration)?;
                         Ok(())
                     }
 
-                    Definition::Sequence { elements } => {
+                    Definition::Sequence { length_width, length_range: _, elements } => {
                         let sequence = value.as_array().ok_or(ExpectationError::Array)?;
-                        BorshSerialize::serialize(&(sequence.len() as u32), writer)?;
+                        let length_width = *length_width as u32;
+                        if length_width != 0  {
+                            let length = sequence.len();
+                            BorshSerialize::serialize(&(length as u32), writer)?;
+                        };
                         for item in sequence {
                             serialize_serde_json_by_declaration_with_schema(writer, item, schema, elements)?;
                         }
@@ -114,7 +114,7 @@ fn serialize_serde_json_by_declaration_with_schema(
                         Ok(())
                     }
 
-                    Definition::Enum { variants } => {
+                    Definition::Enum { variants, .. } => {
                         let (input_variant, variant_values) = value
                             .as_object()
                             .and_then(|o| o.keys().next().map(|s| (s.as_str(), Some(&o[s]))))
@@ -124,12 +124,8 @@ fn serialize_serde_json_by_declaration_with_schema(
                         let (variant_index, variant_declaration) = variants
                             .iter()
                             .enumerate()
-                            .find_map(|(i, (k, v))| {
-                                if k == input_variant {
-                                    Some((i, v))
-                                } else {
-                                    None
-                                }
+                            .find_map(|(i, (.., v))| {
+                                Some((i, v))
                             })
                             .ok_or_else(|| {
                                 anyhow!(
@@ -152,7 +148,7 @@ fn serialize_serde_json_by_declaration_with_schema(
                             let object = value.as_object().ok_or(ExpectationError::Object)?;
                             for (key, value_declaration) in fields {
                                 let property_value = object
-                                    .get(key)
+                                    .get(key.as_str())
                                     .ok_or_else(|| anyhow!("Expected property {key}"))?;
                                 serialize_serde_json_by_declaration_with_schema(
                                     writer,

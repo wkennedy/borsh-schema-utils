@@ -110,7 +110,7 @@
 //! This library is still in early development and there are some caveats to be aware of. The use of u128 and i128 are
 //! somewhat supported. In the case of deserialization u128/i128 are deserialized as strings, but serialization is not
 //! supported.
- 
+
 pub mod deserialize_adapter;
 pub mod serialize_adapter;
 pub mod errors;

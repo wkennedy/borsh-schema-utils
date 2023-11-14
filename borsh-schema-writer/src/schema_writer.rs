@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::Write;
-use borsh::{BorshSchema, BorshSerialize};
+use borsh::{BorshSchema, to_vec};
 use borsh::schema::BorshSchemaContainer;
 
 /// This function takes a Struct with the BorshSchema trait and writes the schema to a specified file.
@@ -16,9 +16,8 @@ use borsh::schema::BorshSchemaContainer;
 pub fn write_schema<T: BorshSchema>(_: T, file_path: String) -> std::io::Result<()> {
     let mut defs = Default::default();
     T::add_definitions_recursively(&mut defs);
-    let container: BorshSchemaContainer = T::schema_container();
-    let data = container
-        .try_to_vec()
+    let container: BorshSchemaContainer = BorshSchemaContainer::for_type::<T>();
+    let data = to_vec(&container)
         .expect("Failed to serialize BorshSchemaContainer");
     let mut file = File::create(file_path).expect("Failed to create borsh schema file");
     file.write_all(&data).expect("Failed to write file");
@@ -36,9 +35,8 @@ pub fn write_schema<T: BorshSchema>(_: T, file_path: String) -> std::io::Result<
 pub fn schema_to_bytes<T: BorshSchema>(_: T) -> std::io::Result<Vec<u8>> {
     let mut defs = Default::default();
     T::add_definitions_recursively(&mut defs);
-    let container: BorshSchemaContainer = T::schema_container();
-    let data = container
-        .try_to_vec()
+    let container: BorshSchemaContainer = BorshSchemaContainer::for_type::<T>();
+    let data = to_vec(&container)
         .expect("Failed to serialize BorshSchemaContainer");
     Ok(data)
 }
