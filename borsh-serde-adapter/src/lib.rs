@@ -12,7 +12,7 @@
 //!         last_name: "Doe".to_string(),
 //!     };
 //!
-//!     let person_ser = person.try_to_vec().expect("Error trying to seralize Person");
+//!     let person_ser = to_vec(&person).expect("Error trying to serialize Person");
 //!
 //!     let file = File::open("./tests/schema/person_schema.dat").unwrap();
 //!     let mut reader = BufReader::new(file);
@@ -27,7 +27,7 @@
 //! would do something like this:
 //!
 //! ```
-//!     let person_serialized = person.try_to_vec().expect("Error trying to serialize Person");
+//!     let person_serialized = to_vec(&person).expect("Error trying to seralize Person");
 //!     let person_deserialized = Person::deserialize(&mut person_serialized.as_slice());
 //! ```
 //!
