@@ -2,7 +2,7 @@
 
 use std::fs::File;
 use std::io::{BufReader, Write};
-use borsh::{BorshDeserialize, BorshSerialize, BorshSchema, schema_container_of, to_vec, from_slice};
+use borsh::{BorshDeserialize, BorshSerialize, BorshSchema, schema_container_of, to_vec};
 use borsh::schema::{BorshSchemaContainer};
 use borsh_serde_adapter::deserialize_adapter::deserialize_from_schema;
 use borsh_serde_adapter::serialize_adapter::serialize_serde_json_to_borsh;

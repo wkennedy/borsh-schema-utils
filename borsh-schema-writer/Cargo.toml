@@ -1,6 +1,6 @@
 [package]
 name = "borsh-schema-writer"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 authors = ["Will Kennedy"]
 description = "Write a BorshSchemaContainer to a binary file"
@@ -12,9 +12,8 @@ categories = ["parsing"]
 exclude=["/tests", "/examples", "/benches", "/docs", "/target", "/.github", "/.gitignore", "/.gitattributes", "/.gitmodules", "/.travis.yml", "/.cargo-ok", "/.git", "/.idea"]
 
 [dependencies]
-borsh = { version = "1.1.1", features = ["std", "unstable__schema"] }
-borsh-derive = "1.1.1"
-
+borsh = { version = "1.4.0", features = ["std", "unstable__schema"] }
+borsh-derive = "1.4.0"
 
 [lib]
 doctest = false
