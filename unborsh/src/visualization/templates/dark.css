@@ -1,0 +1,242 @@
+/* Dark theme for Borsh Structure Visualization */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.header {
+    background-color: #333;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #444;
+}
+
+.header h1 {
+    margin: 0;
+    color: #64b5f6;
+}
+
+.info {
+    font-size: 14px;
+    color: #aaa;
+    margin: 5px 0;
+}
+
+.description {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h2 {
+    color: #64b5f6;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+}
+
+.structure-diagram, .structure-hypothesis, .hex-view {
+    background-color: #252526;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.tree-container {
+    margin-left: 10px;
+}
+
+.tree-node {
+    margin-bottom: 10px;
+    border-left: 2px solid #444;
+    padding-left: 15px;
+    position: relative;
+    overflow: hidden;
+    max-height: 32px;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.tree-node:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 15px;
+    width: 10px;
+    height: 2px;
+    background-color: #444;
+}
+
+.tree-node.expanded {
+    max-height: 500px;
+}
+
+.node-header {
+    cursor: pointer;
+    font-weight: bold;
+    position: relative;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.node-header:after {
+    content: "▶";
+    position: absolute;
+    right: 10px;
+    color: #888;
+    transform: rotate(0deg);
+    transition: transform 0.2s;
+}
+
+.tree-node.expanded .node-header:after {
+    transform: rotate(90deg);
+}
+
+.node-content {
+    padding: 5px 10px;
+    margin-left: 10px;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.interpretation {
+    margin-bottom: 5px;
+}
+
+.confidence {
+    font-style: italic;
+    margin-bottom: 5px;
+}
+
+.raw-bytes {
+    font-family: 'Consolas', 'Courier New', monospace;
+    word-break: break-all;
+    margin-bottom: 5px;
+}
+
+.bytes-more {
+    color: #777;
+    font-style: italic;
+}
+
+.offset-info {
+    color: #888;
+    font-size: 12px;
+}
+
+/* Confidence levels styling */
+.high-confidence {
+    border-left-color: #4CAF50;
+}
+
+.high-confidence .node-header {
+    color: #4CAF50;
+}
+
+.good-confidence {
+    border-left-color: #8BC34A;
+}
+
+.good-confidence .node-header {
+    color: #8BC34A;
+}
+
+.medium-confidence {
+    border-left-color: #FFC107;
+}
+
+.medium-confidence .node-header {
+    color: #FFC107;
+}
+
+.low-confidence {
+    border-left-color: #FF9800;
+}
+
+.low-confidence .node-header {
+    color: #FF9800;
+}
+
+.very-low-confidence {
+    border-left-color: #F44336;
+}
+
+.very-low-confidence .node-header {
+    color: #F44336;
+}
+
+/* Hex view styling */
+.hex-table {
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.hex-table th, .hex-table td {
+    padding: 5px;
+    text-align: center;
+}
+
+.hex-table th {
+    background-color: #333;
+    color: #ccc;
+}
+
+.offset {
+    color: #8891A8;
+}
+
+.hex-byte {
+    background-color: #2d2d2d;
+    color: #d4d4d4;
+}
+
+.separator {
+    width: 10px;
+}
+
+.hex-byte.high-confidence { color: #4CAF50; }
+.hex-byte.good-confidence { color: #8BC34A; }
+.hex-byte.medium-confidence { color: #FFC107; }
+.hex-byte.low-confidence { color: #FF9800; }
+.hex-byte.very-low-confidence { color: #F44336; }
+
+.ascii {
+    text-align: left;
+    padding-left: 10px;
+    font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.ascii span.high-confidence { color: #4CAF50; }
+.ascii span.good-confidence { color: #8BC34A; }
+.ascii span.medium-confidence { color: #FFC107; }
+.ascii span.low-confidence { color: #FF9800; }
+.ascii span.very-low-confidence { color: #F44336; }
+
+/* Structure hypothesis styling */
+.structure-hypothesis pre {
+    background-color: #1e1e1e;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 0;
+}
+
+.structure-hypothesis code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    color: #d4d4d4;
+}
+
+.byte {
+    display: inline-block;
+    padding: 2px;
+}

@@ -3,5 +3,6 @@ resolver = "2"
 
 members = [
     "borsh-serde-adapter",
-    "borsh-schema-writer"
+    "borsh-schema-writer",
+    "unborsh"
 ]
