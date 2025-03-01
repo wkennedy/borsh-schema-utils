@@ -4,5 +4,6 @@ resolver = "2"
 members = [
     "borsh-serde-adapter",
     "borsh-schema-writer",
-    "unborsh"
+    "unborsh",
+    "unborsh-wasm"
 ]
