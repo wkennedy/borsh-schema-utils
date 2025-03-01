@@ -294,7 +294,11 @@
 </div>
 
 <script type="module">
-    import { Unborsh, BinaryUtils, AnalysisStrategy, createSampleData, createComplexSample } from '/pkg/js/index.js';
+    // Detect GitHub Pages path
+    const basePath = location.pathname.includes('/borsh-schema-utils/') ? '/borsh-schema-utils' : '';
+    const path = `${basePath}/pkg/js/index.js`;
+    const module = await import(path);
+    const { Unborsh, BinaryUtils, AnalysisStrategy, createSampleData, createComplexSample } = module;
 
     // Current data for analysis
     let currentData = null;
