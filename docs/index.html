@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unborsh WASM</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .controls {
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 120px;
+        }
+
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            overflow: auto;
+            max-height: 300px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .select-container {
+            margin-bottom: 10px;
+        }
+
+        select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .confidence {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+        }
+
+        .high {
+            background-color: #27ae60;
+        }
+
+        .medium {
+            background-color: #f39c12;
+        }
+
+        .low {
+            background-color: #e74c3c;
+        }
+
+        .match-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+            background-color: #f8f9fa;
+        }
+
+        .bytes {
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 2px;
+        }
+
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<h1>Unborsh WASM</h1>
+<p>
+    This site uses the unborsh-wasm library, which provides WebAssembly bindings for analyzing and reverse-engineering
+    Borsh-serialized data in JS/TS environments.
+</p>
+
+<div class="container">
+    <div class="card full-width">
+        <h2>Input Data</h2>
+        <div class="tabs">
+            <div class="tab active" data-tab="binary-tab">Binary Sample</div>
+            <div class="tab" data-tab="hex-tab">Hex Input</div>
+            <div class="tab" data-tab="base64-tab">Base64 Input</div>
+        </div>
+
+        <div class="tab-content active" id="binary-tab">
+            <div class="controls">
+                <button id="simpleData">Simple String</button>
+                <button id="complexData">Complex Object</button>
+                <button id="customData">Custom Structure</button>
+            </div>
+            <div id="binaryPreview">
+                <pre>No data loaded</pre>
+            </div>
+        </div>
+
+        <div class="tab-content" id="hex-tab">
+            <div class="controls">
+                <textarea id="hexInput" placeholder="Enter hex data (e.g., 0b00000048656c6c6f20576f726c64)"></textarea>
+                <button id="analyzeHex">Analyze Hex Data</button>
+            </div>
+        </div>
+
+        <div class="tab-content" id="base64-tab">
+            <div class="controls">
+                <textarea id="base64Input" placeholder="Enter base64 data (e.g., CwAAAEhlbGxvIFdvcmxk)"></textarea>
+                <button id="analyzeBase64">Analyze Base64 Data</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Analysis Options</h2>
+        <div class="select-container">
+            <label for="strategySelect">Analysis Strategy:</label>
+            <select id="strategySelect">
+                <option value="3">Comprehensive (Default)</option>
+                <option value="0">Pattern Matching</option>
+                <option value="1">Recursive Analysis</option>
+                <option value="2">Probabilistic Analysis</option>
+            </select>
+        </div>
+
+        <div class="select-container">
+            <label for="maxDepth">Max Depth:</label>
+            <input type="number" id="maxDepth" value="5" min="1" max="20">
+        </div>
+
+        <div class="select-container">
+            <label for="minConfidence">Min Confidence (%):</label>
+            <input type="number" id="minConfidence" value="30" min="0" max="100">
+        </div>
+
+        <div class="select-container">
+            <label for="includeRawBytes">
+                <input type="checkbox" id="includeRawBytes">
+                Include Raw Bytes
+            </label>
+        </div>
+
+        <div class="select-container">
+            <label for="maxMatches">Max Matches:</label>
+            <input type="number" id="maxMatches" value="20" min="1">
+        </div>
+
+        <button id="analyzeWithOptions">Analyze with Options</button>
+    </div>
+
+    <div class="card">
+        <h2>Pattern Interpretation</h2>
+        <div class="select-container">
+            <label for="patternSelect">Select Pattern:</label>
+            <select id="patternSelect">
+                <option value="">Loading patterns...</option>
+            </select>
+        </div>
+
+        <div id="patternDetails">
+            <p>Select a pattern to view details</p>
+        </div>
+
+        <button id="interpretAs">Interpret As Selected Pattern</button>
+        <div id="interpretationResult"></div>
+    </div>
+
+    <div class="card">
+        <h2>Structure Hypothesis</h2>
+        <button id="extractHypothesis">Extract Structure Hypothesis</button>
+        <pre id="hypothesisResult">No data analyzed yet</pre>
+    </div>
+
+    <div class="card full-width">
+        <h2>Analysis Results</h2>
+        <div id="analysisResult">
+            <p>No analysis performed yet</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { Unborsh, BinaryUtils, AnalysisStrategy, createSampleData, createComplexSample } from '/pkg/js/index.js';
+
+    // Current data for analysis
+    let currentData = null;
+
+    // DOM Elements
+    const binaryPreviewEl = document.getElementById('binaryPreview');
+    const hexInputEl = document.getElementById('hexInput');
+    const base64InputEl = document.getElementById('base64Input');
+    const analysisResultEl = document.getElementById('analysisResult');
+    const hypothesisResultEl = document.getElementById('hypothesisResult');
+    const interpretationResultEl = document.getElementById('interpretationResult');
+    const patternSelectEl = document.getElementById('patternSelect');
+    const patternDetailsEl = document.getElementById('patternDetails');
+
+    // Helper to format bytes for display
+    function formatBytes(bytes) {
+        if (!bytes || bytes.length === 0) return 'Empty data';
+
+        const hex = BinaryUtils.toHex(bytes);
+        const chunks = [];
+
+        // Display in 16-byte chunks with hex and ASCII
+        for (let i = 0; i < bytes.length; i += 16) {
+            const chunk = bytes.slice(i, i + 16);
+            const hexPart = Array.from(chunk).map(b => b.toString(16).padStart(2, '0')).join(' ');
+            const asciiPart = Array.from(chunk).map(b =>
+                (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.'
+            ).join('');
+
+            chunks.push(`${i.toString(16).padStart(8, '0')}  ${hexPart.padEnd(48, ' ')}  |${asciiPart}|`);
+        }
+
+        return chunks.join('\n');
+    }
+
+    // Helper to display analysis results
+    function displayAnalysisResult(result) {
+        if (!result) {
+            analysisResultEl.innerHTML = '<p>Analysis failed</p>';
+            return;
+        }
+
+        let confidenceClass = 'low';
+        if (result.confidence >= 70) confidenceClass = 'high';
+        else if (result.confidence >= 50) confidenceClass = 'medium';
+
+        let html = `
+                <div class="result-header">
+                    <h3>Analysis Overview</h3>
+                    <span class="confidence ${confidenceClass}">Confidence: ${result.confidence}%</span>
+                </div>
+                <p>${result.description}</p>
+            `;
+
+        if (result.matches && result.matches.length > 0) {
+            html += '<h3>Detected Patterns</h3>';
+
+            result.matches.forEach(match => {
+                let matchConfidenceClass = 'low';
+                if (match.confidence >= 70) matchConfidenceClass = 'high';
+                else if (match.confidence >= 50) matchConfidenceClass = 'medium';
+
+                html += `
+                        <div class="match-item">
+                            <div class="result-header">
+                                <strong>${match.pattern_name}</strong>
+                                <span class="confidence ${matchConfidenceClass}">${match.confidence}%</span>
+                            </div>
+                            <p>${match.interpretation}</p>
+                            <p>Offset: 0x${match.offset.toString(16)}, Length: ${match.length} bytes</p>
+                    `;
+
+                if (match.data && match.data.length > 0) {
+                    const dataBytes = new Uint8Array(match.data);
+                    html += `<div class="bytes">${BinaryUtils.toHex(dataBytes)}</div>`;
+                }
+
+                html += '</div>';
+            });
+        } else {
+            html += '<p>No patterns detected</p>';
+        }
+
+        analysisResultEl.innerHTML = html;
+
+        // Also update hypothesis if available
+        if (result.structure_hypothesis) {
+            hypothesisResultEl.textContent = result.structure_hypothesis;
+        }
+    }
+
+    // Load and display sample data
+    function loadSimpleData() {
+        currentData = createSampleData();
+        binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
+        hexInputEl.value = BinaryUtils.toHex(currentData);
+        base64InputEl.value = BinaryUtils.toBase64(currentData);
+    }
+
+    function loadComplexData() {
+        currentData = createComplexSample();
+        binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
+        hexInputEl.value = BinaryUtils.toHex(currentData);
+        base64InputEl.value = BinaryUtils.toBase64(currentData);
+    }
+
+    // Custom structure with multiple fields and types
+    function loadCustomData() {
+        // Create a more complex structure with different field types
+        const bytes = new Uint8Array([
+            // First field: a string "Borsh"
+            5, 0, 0, 0,                   // Length of "Borsh" as u32 (5)
+            66, 111, 114, 115, 104,       // "Borsh" in ASCII
+
+            // Second field: an array of three u32 values
+            3, 0, 0, 0,                   // Length of array as u32 (3)
+            10, 0, 0, 0,                  // First u32 value (10)
+            20, 0, 0, 0,                  // Second u32 value (20)
+            30, 0, 0, 0,                  // Third u32 value (30)
+
+            // Third field: Option<String> with Some("test")
+            1,                            // Some variant (1)
+            4, 0, 0, 0,                   // Length of "test" as u32 (4)
+            116, 101, 115, 116,           // "test" in ASCII
+
+            // Fourth field: a bool
+            1                             // true
+        ]);
+
+        currentData = bytes;
+        binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
+        hexInputEl.value = BinaryUtils.toHex(currentData);
+        base64InputEl.value = BinaryUtils.toBase64(currentData);
+    }
+
+    // Analyze with default settings
+    function analyzeDefault() {
+        if (!currentData) {
+            alert('Please load some data first');
+            return;
+        }
+
+        try {
+            const result = Unborsh.analyze(currentData);
+            displayAnalysisResult(result);
+        } catch (err) {
+            console.error('Analysis error:', err);
+            analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+        }
+    }
+
+    // Analyze with custom options
+    function analyzeWithOptions() {
+        if (!currentData) {
+            alert('Please load some data first');
+            return;
+        }
+
+        const strategyValue = parseInt(document.getElementById('strategySelect').value);
+        const maxDepth = parseInt(document.getElementById('maxDepth').value);
+        const minConfidence = parseInt(document.getElementById('minConfidence').value);
+        const includeRawBytes = document.getElementById('includeRawBytes').checked;
+        const maxMatches = parseInt(document.getElementById('maxMatches').value);
+
+        const options = {
+            strategy: strategyValue,
+            maxDepth: maxDepth,
+            minConfidence: minConfidence,
+            includeRawBytes: includeRawBytes,
+            maxMatches: maxMatches
+        };
+
+        try {
+            const result = Unborsh.analyzeWithOptions(currentData, options);
+            displayAnalysisResult(result);
+        } catch (err) {
+            console.error('Analysis error:', err);
+            analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+        }
+    }
+
+    // Analyze hex input
+    function analyzeHexInput() {
+        const hexValue = hexInputEl.value.trim();
+        if (!hexValue) {
+            alert('Please enter some hex data');
+            return;
+        }
+
+        try {
+            const result = Unborsh.analyzeHex(hexValue);
+            currentData = BinaryUtils.fromHex(hexValue);
+            binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
+            base64InputEl.value = BinaryUtils.toBase64(currentData);
+            displayAnalysisResult(result);
+        } catch (err) {
+            console.error('Analysis error:', err);
+            analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+        }
+    }
+
+    // Analyze base64 input
+    function analyzeBase64Input() {
+        const base64Value = base64InputEl.value.trim();
+        if (!base64Value) {
+            alert('Please enter some base64 data');
+            return;
+        }
+
+        try {
+            const result = Unborsh.analyzeBase64(base64Value);
+            currentData = BinaryUtils.fromBase64(base64Value);
+            binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
+            hexInputEl.value = BinaryUtils.toHex(currentData);
+            displayAnalysisResult(result);
+        } catch (err) {
+            console.error('Analysis error:', err);
+            analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+        }
+    }
+
+    // Extract structure hypothesis
+    function extractHypothesis() {
+        if (!currentData) {
+            alert('Please load some data first');
+            return;
+        }
+
+        try {
+            const hypothesis = Unborsh.extractStructureHypothesis(currentData);
+            hypothesisResultEl.textContent = hypothesis;
+        } catch (err) {
+            console.error('Hypothesis error:', err);
+            hypothesisResultEl.textContent = `Error: ${err.message}`;
+        }
+    }
+
+    // Load available patterns
+    async function loadPatterns() {
+        try {
+            const patterns = Unborsh.getAvailablePatterns();
+            patternSelectEl.innerHTML = '';
+
+            patterns.forEach(pattern => {
+                const option = document.createElement('option');
+                option.value = pattern;
+                option.textContent = pattern;
+                patternSelectEl.appendChild(option);
+            });
+
+            // Show details for the first pattern
+            if (patterns.length > 0) {
+                showPatternDetails(patterns[0]);
+            }
+        } catch (err) {
+            console.error('Error loading patterns:', err);
+            patternSelectEl.innerHTML = '<option value="">Error loading patterns</option>';
+        }
+    }
+
+    // Show pattern details
+    function showPatternDetails(patternName) {
+        try {
+            const details = Unborsh.getPatternDetails(patternName);
+            patternDetailsEl.innerHTML = `
+                    <h3>${details.name}</h3>
+                    <p>${details.description}</p>
+                    <p><strong>Example:</strong> ${details.example}</p>
+                `;
+        } catch (err) {
+            console.error('Error loading pattern details:', err);
+            patternDetailsEl.innerHTML = `<p>Error: ${err.message}</p>`;
+        }
+    }
+
+    // Interpret as selected pattern
+    function interpretAsPattern() {
+        if (!currentData) {
+            alert('Please load some data first');
+            return;
+        }
+
+        const patternName = patternSelectEl.value;
+        if (!patternName) {
+            alert('Please select a pattern');
+            return;
+        }
+
+        try {
+            const interpretation = Unborsh.interpretAs(currentData, patternName);
+            interpretationResultEl.innerHTML = `
+                    <div class="match-item">
+                        <strong>Interpretation as ${patternName}:</strong>
+                        <p>${interpretation}</p>
+                    </div>
+                `;
+        } catch (err) {
+            console.error('Interpretation error:', err);
+            interpretationResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+        }
+    }
+
+    // Tab switching functionality
+    function setupTabs() {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and content
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked tab
+                tab.classList.add('active');
+
+                // Show corresponding content
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    }
+
+    // Event listeners
+    document.getElementById('simpleData').addEventListener('click', () => {
+        loadSimpleData();
+        analyzeDefault();
+    });
+
+    document.getElementById('complexData').addEventListener('click', () => {
+        loadComplexData();
+        analyzeDefault();
+    });
+
+    document.getElementById('customData').addEventListener('click', () => {
+        loadCustomData();
+        analyzeDefault();
+    });
+
+    document.getElementById('analyzeWithOptions').addEventListener('click', analyzeWithOptions);
+    document.getElementById('analyzeHex').addEventListener('click', analyzeHexInput);
+    document.getElementById('analyzeBase64').addEventListener('click', analyzeBase64Input);
+    document.getElementById('extractHypothesis').addEventListener('click', extractHypothesis);
+    document.getElementById('interpretAs').addEventListener('click', interpretAsPattern);
+
+    patternSelectEl.addEventListener('change', () => {
+        showPatternDetails(patternSelectEl.value);
+    });
+
+    // Initialize
+    setupTabs();
+    loadPatterns();
+    loadSimpleData();
+    analyzeDefault();
+</script>
+</body>
+</html>

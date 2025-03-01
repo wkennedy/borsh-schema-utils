@@ -1,0 +1,33 @@
+{
+  "name": "unborsh-wasm",
+  "type": "module",
+  "collaborators": [
+    "Your Name <your.email@example.com>"
+  ],
+  "description": "WebAssembly bindings for unborsh - tools for analyzing Borsh serialized data",
+  "version": "0.1.0",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/unborsh.git"
+  },
+  "files": [
+    "unborsh_wasm_bg.wasm",
+    "unborsh_wasm.js",
+    "unborsh_wasm.d.ts",
+    "js/index.js",
+    "js/index.d.ts"
+  ],
+  "main": "unborsh_wasm.js",
+  "types": "unborsh_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ],
+  "keywords": [
+    "borsh",
+    "serialization",
+    "analysis",
+    "wasm",
+    "webassembly"
+  ]
+}
