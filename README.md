@@ -11,7 +11,8 @@ not know the schema ahead of time, or are not able to use create or compile code
 
 [borsh-serde-adapter](./borsh-serde-adapter/) - [README](./borsh-serde-adapter/README.md) - [crates.io](https://crates.io/crates/borsh-serde-adapter)
 
-[unborsh](./unborsh/) -[README](./unborsh/README.md)
+[unborsh](./unborsh/) - [README](./unborsh/README.md)
+
 [unborsh demo](https://wkennedy.github.io/borsh-schema-utils/)
 
 For example uses, please see the integration_test files in each library.
