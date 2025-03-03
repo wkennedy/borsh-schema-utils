@@ -55,10 +55,16 @@
             cursor: pointer;
             margin-right: 5px;
             font-size: 14px;
+            transition: background-color 0.2s;
         }
 
         button:hover {
             background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
         }
 
         textarea, input[type="text"] {
@@ -166,12 +172,18 @@
             border-bottom: none;
             border-radius: 4px 4px 0 0;
             margin-right: 2px;
+            transition: background-color 0.2s;
+        }
+
+        .tab:hover {
+            background-color: #e9f7fe;
         }
 
         .tab.active {
             background-color: white;
             border-bottom: 1px solid white;
             margin-bottom: -1px;
+            font-weight: bold;
         }
 
         .tab-content {
@@ -181,14 +193,200 @@
         .tab-content.active {
             display: block;
         }
+
+        .notification {
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+            animation: fadeOut 5s forwards;
+            opacity: 1;
+        }
+
+        .notification.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .notification.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .notification.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .notifications-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            z-index: 1000;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            margin-left: 5px;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: normal;
+            font-size: 12px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Help icon */
+        .help-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 12px;
+            cursor: help;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toggle switch for raw bytes */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            vertical-align: middle;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3498db;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Style focus state */
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        /* Collapsible panels */
+        .collapsible {
+            cursor: pointer;
+            padding: 10px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            background-color: #f8f9fa;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collapsible:hover {
+            background-color: #e9e9e9;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+        }
     </style>
 </head>
 <body>
 <h1>Unborsh WASM</h1>
 <p>
-    This site uses the unborsh-wasm library, which provides WebAssembly bindings for analyzing and reverse-engineering
-    Borsh-serialized data in JS/TS environments.
+    This tool helps you analyze Borsh-serialized data, commonly used in Solana and NEAR Protocol smart contracts.
+    Upload your binary data, paste a hex string, or use one of our sample datasets to get started.
 </p>
+
+<!-- Notifications container -->
+<div class="notifications-container" id="notifications"></div>
 
 <div class="container">
     <div class="card full-width">
@@ -204,6 +402,10 @@
                 <button id="simpleData">Simple String</button>
                 <button id="complexData">Complex Object</button>
                 <button id="customData">Custom Structure</button>
+                <span class="tooltip">
+                    <span class="help-icon">?</span>
+                    <span class="tooltiptext">These are pre-configured Borsh data samples for testing. Click to load and analyze.</span>
+                </span>
             </div>
             <div id="binaryPreview">
                 <pre>No data loaded</pre>
@@ -214,6 +416,10 @@
             <div class="controls">
                 <textarea id="hexInput" placeholder="Enter hex data (e.g., 0b00000048656c6c6f20576f726c64)"></textarea>
                 <button id="analyzeHex">Analyze Hex Data</button>
+                <span class="tooltip">
+                    <span class="help-icon">?</span>
+                    <span class="tooltiptext">Enter a hexadecimal string representing Borsh-encoded data. The 0x prefix is optional.</span>
+                </span>
             </div>
         </div>
 
@@ -221,6 +427,10 @@
             <div class="controls">
                 <textarea id="base64Input" placeholder="Enter base64 data (e.g., CwAAAEhlbGxvIFdvcmxk)"></textarea>
                 <button id="analyzeBase64">Analyze Base64 Data</button>
+                <span class="tooltip">
+                    <span class="help-icon">?</span>
+                    <span class="tooltiptext">Enter a base64-encoded string representing Borsh-encoded data.</span>
+                </span>
             </div>
         </div>
     </div>
@@ -235,28 +445,51 @@
                 <option value="1">Recursive Analysis</option>
                 <option value="2">Probabilistic Analysis</option>
             </select>
+            <span class="tooltip">
+                <span class="help-icon">?</span>
+                <span class="tooltiptext">Choose the analysis strategy. Comprehensive combines all approaches for best results.</span>
+            </span>
         </div>
 
         <div class="select-container">
             <label for="maxDepth">Max Depth:</label>
             <input type="number" id="maxDepth" value="5" min="1" max="20">
+            <span class="tooltip">
+                <span class="help-icon">?</span>
+                <span class="tooltiptext">Maximum recursion depth for nested structures.</span>
+            </span>
         </div>
 
         <div class="select-container">
             <label for="minConfidence">Min Confidence (%):</label>
             <input type="number" id="minConfidence" value="30" min="0" max="100">
+            <span class="tooltip">
+                <span class="help-icon">?</span>
+                <span class="tooltiptext">Minimum confidence threshold for including pattern matches.</span>
+            </span>
         </div>
 
         <div class="select-container">
-            <label for="includeRawBytes">
-                <input type="checkbox" id="includeRawBytes">
+            <label for="includeRawBytes" style="display: inline-flex; align-items: center;">
                 Include Raw Bytes
+                <label class="switch" style="margin-left: 10px;">
+                    <input type="checkbox" id="includeRawBytes">
+                    <span class="slider"></span>
+                </label>
             </label>
+            <span class="tooltip">
+                <span class="help-icon">?</span>
+                <span class="tooltiptext">When enabled, raw byte data will be included in the results.</span>
+            </span>
         </div>
 
         <div class="select-container">
             <label for="maxMatches">Max Matches:</label>
             <input type="number" id="maxMatches" value="20" min="1">
+            <span class="tooltip">
+                <span class="help-icon">?</span>
+                <span class="tooltiptext">Maximum number of pattern matches to display.</span>
+            </span>
         </div>
 
         <button id="analyzeWithOptions">Analyze with Options</button>
@@ -269,6 +502,10 @@
             <select id="patternSelect">
                 <option value="">Loading patterns...</option>
             </select>
+            <span class="tooltip">
+                <span class="help-icon">?</span>
+                <span class="tooltiptext">Choose a specific Borsh pattern to interpret the data as.</span>
+            </span>
         </div>
 
         <div id="patternDetails">
@@ -281,6 +518,7 @@
 
     <div class="card">
         <h2>Structure Hypothesis</h2>
+        <p>This is a best-guess at the structure of your Borsh-encoded data, shown as Rust code.</p>
         <button id="extractHypothesis">Extract Structure Hypothesis</button>
         <pre id="hypothesisResult">No data analyzed yet</pre>
     </div>
@@ -303,6 +541,9 @@
     // Current data for analysis
     let currentData = null;
 
+    // Keep track of analysis status
+    let isAnalyzing = false;
+
     // DOM Elements
     const binaryPreviewEl = document.getElementById('binaryPreview');
     const hexInputEl = document.getElementById('hexInput');
@@ -312,6 +553,36 @@
     const interpretationResultEl = document.getElementById('interpretationResult');
     const patternSelectEl = document.getElementById('patternSelect');
     const patternDetailsEl = document.getElementById('patternDetails');
+    const notificationsEl = document.getElementById('notifications');
+
+    // Helper function to show notifications
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        notificationsEl.appendChild(notification);
+
+        // Remove notification after animation completes
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    // Helper function to toggle loading state on buttons
+    function setButtonLoading(button, isLoading) {
+        if (isLoading) {
+            button.disabled = true;
+            const loadingSpinner = document.createElement('span');
+            loadingSpinner.className = 'loading';
+            button.appendChild(loadingSpinner);
+        } else {
+            button.disabled = false;
+            const spinner = button.querySelector('.loading');
+            if (spinner) {
+                spinner.remove();
+            }
+        }
+    }
 
     // Helper to format bytes for display
     function formatBytes(bytes) {
@@ -335,6 +606,7 @@
     }
 
     // Helper to display analysis results
+    // Helper to display analysis results
     function displayAnalysisResult(result) {
         if (!result) {
             analysisResultEl.innerHTML = '<p>Analysis failed</p>';
@@ -346,12 +618,12 @@
         else if (result.confidence >= 50) confidenceClass = 'medium';
 
         let html = `
-                <div class="result-header">
-                    <h3>Analysis Overview</h3>
-                    <span class="confidence ${confidenceClass}">Confidence: ${result.confidence}%</span>
-                </div>
-                <p>${result.description}</p>
-            `;
+        <div class="result-header">
+            <h3>Analysis Overview</h3>
+            <span class="confidence ${confidenceClass}">Confidence: ${result.confidence}%</span>
+        </div>
+        <p>${result.description}</p>
+    `;
 
         if (result.matches && result.matches.length > 0) {
             html += '<h3>Detected Patterns</h3>';
@@ -362,14 +634,14 @@
                 else if (match.confidence >= 50) matchConfidenceClass = 'medium';
 
                 html += `
-                        <div class="match-item">
-                            <div class="result-header">
-                                <strong>${match.pattern_name}</strong>
-                                <span class="confidence ${matchConfidenceClass}">${match.confidence}%</span>
-                            </div>
-                            <p>${match.interpretation}</p>
-                            <p>Offset: 0x${match.offset.toString(16)}, Length: ${match.length} bytes</p>
-                    `;
+                <div class="match-item">
+                    <div class="result-header">
+                        <strong>${match.pattern_name}</strong>
+                        <span class="confidence ${matchConfidenceClass}">${match.confidence}%</span>
+                    </div>
+                    <p>${match.interpretation}</p>
+                    <p>Offset: 0x${match.offset.toString(16)}, Length: ${match.length} bytes</p>
+            `;
 
                 if (match.data && match.data.length > 0) {
                     const dataBytes = new Uint8Array(match.data);
@@ -382,6 +654,7 @@
             html += '<p>No patterns detected</p>';
         }
 
+        // Set the HTML content directly
         analysisResultEl.innerHTML = html;
 
         // Also update hypothesis if available
@@ -392,70 +665,137 @@
 
     // Load and display sample data
     function loadSimpleData() {
-        currentData = createSampleData();
-        binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
-        hexInputEl.value = BinaryUtils.toHex(currentData);
-        base64InputEl.value = BinaryUtils.toBase64(currentData);
+        const button = document.getElementById('simpleData');
+        setButtonLoading(button, true);
+
+        setTimeout(() => { // Timeout for UI feedback
+            currentData = createSampleData();
+            binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
+            hexInputEl.value = BinaryUtils.toHex(currentData);
+            base64InputEl.value = BinaryUtils.toBase64(currentData);
+
+            showNotification('Simple string sample loaded successfully', 'success');
+            setButtonLoading(button, false);
+
+            // Automatically analyze the data
+            analyzeDefault();
+        }, 300);
     }
 
     function loadComplexData() {
-        currentData = createComplexSample();
-        binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
-        hexInputEl.value = BinaryUtils.toHex(currentData);
-        base64InputEl.value = BinaryUtils.toBase64(currentData);
+        const button = document.getElementById('complexData');
+        setButtonLoading(button, true);
+
+        setTimeout(() => { // Timeout for UI feedback
+            currentData = createComplexSample();
+            binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
+            hexInputEl.value = BinaryUtils.toHex(currentData);
+            base64InputEl.value = BinaryUtils.toBase64(currentData);
+
+            showNotification('Complex object sample loaded successfully', 'success');
+            setButtonLoading(button, false);
+
+            // Automatically analyze the data
+            analyzeDefault();
+        }, 300);
     }
 
     // Custom structure with multiple fields and types
     function loadCustomData() {
-        // Create a more complex structure with different field types
-        const bytes = new Uint8Array([
-            // First field: a string "Borsh"
-            5, 0, 0, 0,                   // Length of "Borsh" as u32 (5)
-            66, 111, 114, 115, 104,       // "Borsh" in ASCII
+        const button = document.getElementById('customData');
+        setButtonLoading(button, true);
 
-            // Second field: an array of three u32 values
-            3, 0, 0, 0,                   // Length of array as u32 (3)
-            10, 0, 0, 0,                  // First u32 value (10)
-            20, 0, 0, 0,                  // Second u32 value (20)
-            30, 0, 0, 0,                  // Third u32 value (30)
+        setTimeout(() => { // Timeout for UI feedback
+            // Create a more complex structure with different field types
+            const bytes = new Uint8Array([
+                // First field: a string "Borsh"
+                5, 0, 0, 0,                   // Length of "Borsh" as u32 (5)
+                66, 111, 114, 115, 104,       // "Borsh" in ASCII
 
-            // Third field: Option<String> with Some("test")
-            1,                            // Some variant (1)
-            4, 0, 0, 0,                   // Length of "test" as u32 (4)
-            116, 101, 115, 116,           // "test" in ASCII
+                // Second field: an array of three u32 values
+                3, 0, 0, 0,                   // Length of array as u32 (3)
+                10, 0, 0, 0,                  // First u32 value (10)
+                20, 0, 0, 0,                  // Second u32 value (20)
+                30, 0, 0, 0,                  // Third u32 value (30)
 
-            // Fourth field: a bool
-            1                             // true
-        ]);
+                // Third field: Option<String> with Some("test")
+                1,                            // Some variant (1)
+                4, 0, 0, 0,                   // Length of "test" as u32 (4)
+                116, 101, 115, 116,           // "test" in ASCII
 
-        currentData = bytes;
-        binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
-        hexInputEl.value = BinaryUtils.toHex(currentData);
-        base64InputEl.value = BinaryUtils.toBase64(currentData);
+                // Fourth field: a bool
+                1                             // true
+            ]);
+
+            currentData = bytes;
+            binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
+            hexInputEl.value = BinaryUtils.toHex(currentData);
+            base64InputEl.value = BinaryUtils.toBase64(currentData);
+
+            showNotification('Custom structure sample loaded successfully', 'success');
+            setButtonLoading(button, false);
+
+            // Automatically analyze the data
+            analyzeDefault();
+        }, 300);
     }
 
     // Analyze with default settings
+    // Analyze with default settings
     function analyzeDefault() {
         if (!currentData) {
-            alert('Please load some data first');
+            showNotification('Please load some data first', 'error');
             return;
         }
 
+        if (isAnalyzing) return;
+        isAnalyzing = true;
+
         try {
-            const result = Unborsh.analyze(currentData);
-            displayAnalysisResult(result);
+            // Show analysis in progress message
+            analysisResultEl.innerHTML = '<p><span class="loading"></span> Analyzing data...</p>';
+
+            // Use setTimeout to allow UI to update
+            setTimeout(() => {
+                try {
+                    const result = Unborsh.analyze(currentData);
+
+                    // Make sure result is defined before passing to displayAnalysisResult
+                    if (result) {
+                        displayAnalysisResult(result);
+                        showNotification('Analysis completed successfully', 'success');
+                    } else {
+                        analysisResultEl.innerHTML = '<p>Analysis returned no results</p>';
+                        showNotification('Analysis returned empty results', 'error');
+                    }
+                } catch (err) {
+                    console.error('Analysis error:', err);
+                    analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+                    showNotification(`Analysis failed: ${err.message}`, 'error');
+                } finally {
+                    isAnalyzing = false;
+                }
+            }, 100);
         } catch (err) {
             console.error('Analysis error:', err);
             analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+            showNotification(`Analysis failed: ${err.message}`, 'error');
+            isAnalyzing = false;
         }
     }
 
     // Analyze with custom options
     function analyzeWithOptions() {
         if (!currentData) {
-            alert('Please load some data first');
+            showNotification('Please load some data first', 'error');
             return;
         }
+
+        if (isAnalyzing) return;
+        isAnalyzing = true;
+
+        const button = document.getElementById('analyzeWithOptions');
+        setButtonLoading(button, true);
 
         const strategyValue = parseInt(document.getElementById('strategySelect').value);
         const maxDepth = parseInt(document.getElementById('maxDepth').value);
@@ -471,12 +811,40 @@
             maxMatches: maxMatches
         };
 
+        // Show analysis in progress message
+        analysisResultEl.innerHTML = '<p><span class="loading"></span> Analyzing data with custom options...</p>';
+
         try {
-            const result = Unborsh.analyzeWithOptions(currentData, options);
-            displayAnalysisResult(result);
+            // Use setTimeout to allow UI to update
+            setTimeout(() => {
+                try {
+                    const result = Unborsh.analyzeWithOptions(currentData, options);
+
+                    // Direct check and console log for debugging
+                    console.log("Analysis result:", result);
+
+                    if (result) {
+                        displayAnalysisResult(result);
+                        showNotification('Custom analysis completed successfully', 'success');
+                    } else {
+                        analysisResultEl.innerHTML = '<p>Analysis returned no results</p>';
+                        showNotification('Analysis returned empty results', 'error');
+                    }
+                } catch (err) {
+                    console.error('Analysis error:', err);
+                    analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+                    showNotification(`Analysis failed: ${err.message}`, 'error');
+                } finally {
+                    isAnalyzing = false;
+                    setButtonLoading(button, false);
+                }
+            }, 300);
         } catch (err) {
             console.error('Analysis error:', err);
             analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+            showNotification(`Analysis failed: ${err.message}`, 'error');
+            isAnalyzing = false;
+            setButtonLoading(button, false);
         }
     }
 
@@ -484,19 +852,44 @@
     function analyzeHexInput() {
         const hexValue = hexInputEl.value.trim();
         if (!hexValue) {
-            alert('Please enter some hex data');
+            showNotification('Please enter some hex data', 'error');
             return;
         }
 
+        if (isAnalyzing) return;
+        isAnalyzing = true;
+
+        const button = document.getElementById('analyzeHex');
+        setButtonLoading(button, true);
+
         try {
-            const result = Unborsh.analyzeHex(hexValue);
-            currentData = BinaryUtils.fromHex(hexValue);
-            binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
-            base64InputEl.value = BinaryUtils.toBase64(currentData);
-            displayAnalysisResult(result);
+            // Show analysis in progress message
+            analysisResultEl.innerHTML = '<p><span class="loading"></span> Analyzing hex data...</p>';
+
+            // Use setTimeout to allow UI to update
+            setTimeout(() => {
+                try {
+                    const result = Unborsh.analyzeHex(hexValue);
+                    currentData = BinaryUtils.fromHex(hexValue);
+                    binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
+                    base64InputEl.value = BinaryUtils.toBase64(currentData);
+                    displayAnalysisResult(result);
+                    showNotification('Hex data analyzed successfully', 'success');
+                } catch (err) {
+                    console.error('Analysis error:', err);
+                    analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+                    showNotification(`Analysis failed: ${err.message}`, 'error');
+                } finally {
+                    isAnalyzing = false;
+                    setButtonLoading(button, false);
+                }
+            }, 300);
         } catch (err) {
             console.error('Analysis error:', err);
             analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+            showNotification(`Analysis failed: ${err.message}`, 'error');
+            isAnalyzing = false;
+            setButtonLoading(button, false);
         }
     }
 
@@ -504,100 +897,183 @@
     function analyzeBase64Input() {
         const base64Value = base64InputEl.value.trim();
         if (!base64Value) {
-            alert('Please enter some base64 data');
+            showNotification('Please enter some base64 data', 'error');
             return;
         }
 
+        if (isAnalyzing) return;
+        isAnalyzing = true;
+
+        const button = document.getElementById('analyzeBase64');
+        setButtonLoading(button, true);
+
         try {
-            const result = Unborsh.analyzeBase64(base64Value);
-            currentData = BinaryUtils.fromBase64(base64Value);
-            binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
-            hexInputEl.value = BinaryUtils.toHex(currentData);
-            displayAnalysisResult(result);
+            // Show analysis in progress message
+            analysisResultEl.innerHTML = '<p><span class="loading"></span> Analyzing base64 data...</p>';
+
+            // Use setTimeout to allow UI to update
+            setTimeout(() => {
+                try {
+                    const result = Unborsh.analyzeBase64(base64Value);
+                    currentData = BinaryUtils.fromBase64(base64Value);
+                    binaryPreviewEl.innerHTML = `<pre>${formatBytes(currentData)}</pre>`;
+                    hexInputEl.value = BinaryUtils.toHex(currentData);
+                    displayAnalysisResult(result);
+                    showNotification('Base64 data analyzed successfully', 'success');
+                } catch (err) {
+                    console.error('Analysis error:', err);
+                    analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+                    showNotification(`Analysis failed: ${err.message}`, 'error');
+                } finally {
+                    isAnalyzing = false;
+                    setButtonLoading(button, false);
+                }
+            }, 300);
         } catch (err) {
             console.error('Analysis error:', err);
             analysisResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+            showNotification(`Analysis failed: ${err.message}`, 'error');
+            isAnalyzing = false;
+            setButtonLoading(button, false);
         }
     }
 
     // Extract structure hypothesis
     function extractHypothesis() {
         if (!currentData) {
-            alert('Please load some data first');
+            showNotification('Please load some data first', 'error');
             return;
         }
 
+        const button = document.getElementById('extractHypothesis');
+        setButtonLoading(button, true);
+
         try {
-            const hypothesis = Unborsh.extractStructureHypothesis(currentData);
-            hypothesisResultEl.textContent = hypothesis;
+            // Use setTimeout to allow UI to update
+            setTimeout(() => {
+                try {
+                    const hypothesis = Unborsh.extractStructureHypothesis(currentData);
+                    hypothesisResultEl.textContent = hypothesis;
+                    showNotification('Structure hypothesis extracted successfully', 'success');
+                } catch (err) {
+                    console.error('Hypothesis error:', err);
+                    hypothesisResultEl.textContent = `Error: ${err.message}`;
+                    showNotification(`Extraction failed: ${err.message}`, 'error');
+                } finally {
+                    setButtonLoading(button, false);
+                }
+            }, 300);
         } catch (err) {
             console.error('Hypothesis error:', err);
             hypothesisResultEl.textContent = `Error: ${err.message}`;
+            showNotification(`Extraction failed: ${err.message}`, 'error');
+            setButtonLoading(button, false);
         }
     }
 
     // Load available patterns
     async function loadPatterns() {
         try {
-            const patterns = Unborsh.getAvailablePatterns();
-            patternSelectEl.innerHTML = '';
+            patternSelectEl.innerHTML = '<option value="">Loading patterns...</option>';
 
-            patterns.forEach(pattern => {
-                const option = document.createElement('option');
-                option.value = pattern;
-                option.textContent = pattern;
-                patternSelectEl.appendChild(option);
-            });
+            // Use setTimeout to simulate loading
+            setTimeout(() => {
+                try {
+                    const patterns = Unborsh.getAvailablePatterns();
+                    patternSelectEl.innerHTML = '';
 
-            // Show details for the first pattern
-            if (patterns.length > 0) {
-                showPatternDetails(patterns[0]);
-            }
+                    patterns.forEach(pattern => {
+                        const option = document.createElement('option');
+                        option.value = pattern;
+                        option.textContent = pattern;
+                        patternSelectEl.appendChild(option);
+                    });
+
+                    // Show details for the first pattern
+                    if (patterns.length > 0) {
+                        showPatternDetails(patterns[0]);
+                    }
+
+                    showNotification(`Loaded ${patterns.length} patterns successfully`, 'info');
+                } catch (err) {
+                    console.error('Error loading patterns:', err);
+                    patternSelectEl.innerHTML = '<option value="">Error loading patterns</option>';
+                    showNotification('Failed to load patterns', 'error');
+                }
+            }, 300);
         } catch (err) {
             console.error('Error loading patterns:', err);
             patternSelectEl.innerHTML = '<option value="">Error loading patterns</option>';
+            showNotification('Failed to load patterns', 'error');
         }
     }
 
     // Show pattern details
     function showPatternDetails(patternName) {
+        patternDetailsEl.innerHTML = '<p><span class="loading"></span> Loading pattern details...</p>';
+
         try {
-            const details = Unborsh.getPatternDetails(patternName);
-            patternDetailsEl.innerHTML = `
-                    <h3>${details.name}</h3>
-                    <p>${details.description}</p>
-                    <p><strong>Example:</strong> ${details.example}</p>
-                `;
+            // Use setTimeout for smoother UI update
+            setTimeout(() => {
+                try {
+                    const details = Unborsh.getPatternDetails(patternName);
+                    patternDetailsEl.innerHTML = `
+                            <h3>${details.name}</h3>
+                            <p>${details.description}</p>
+                            <p><strong>Example:</strong> ${details.example}</p>
+                        `;
+                } catch (err) {
+                    console.error('Error loading pattern details:', err);
+                    patternDetailsEl.innerHTML = `<p class="notification error">Error: ${err.message}</p>`;
+                }
+            }, 200);
         } catch (err) {
             console.error('Error loading pattern details:', err);
-            patternDetailsEl.innerHTML = `<p>Error: ${err.message}</p>`;
+            patternDetailsEl.innerHTML = `<p class="notification error">Error: ${err.message}</p>`;
         }
     }
 
     // Interpret as selected pattern
     function interpretAsPattern() {
         if (!currentData) {
-            alert('Please load some data first');
+            showNotification('Please load some data first', 'error');
             return;
         }
 
         const patternName = patternSelectEl.value;
         if (!patternName) {
-            alert('Please select a pattern');
+            showNotification('Please select a pattern', 'error');
             return;
         }
 
+        const button = document.getElementById('interpretAs');
+        setButtonLoading(button, true);
+
         try {
-            const interpretation = Unborsh.interpretAs(currentData, patternName);
-            interpretationResultEl.innerHTML = `
-                    <div class="match-item">
-                        <strong>Interpretation as ${patternName}:</strong>
-                        <p>${interpretation}</p>
-                    </div>
-                `;
+            // Use setTimeout to allow UI to update
+            setTimeout(() => {
+                try {
+                    const interpretation = Unborsh.interpretAs(currentData, patternName);
+                    interpretationResultEl.innerHTML = `
+                            <div class="match-item">
+                                <strong>Interpretation as ${patternName}:</strong>
+                                <p>${interpretation}</p>
+                            </div>
+                        `;
+                    showNotification(`Data interpreted as ${patternName} successfully`, 'success');
+                } catch (err) {
+                    console.error('Interpretation error:', err);
+                    interpretationResultEl.innerHTML = `<p class="notification error">Error: ${err.message}</p>`;
+                    showNotification(`Interpretation failed: ${err.message}`, 'error');
+                } finally {
+                    setButtonLoading(button, false);
+                }
+            }, 300);
         } catch (err) {
             console.error('Interpretation error:', err);
-            interpretationResultEl.innerHTML = `<p>Error: ${err.message}</p>`;
+            interpretationResultEl.innerHTML = `<p class="notification error">Error: ${err.message}</p>`;
+            showNotification(`Interpretation failed: ${err.message}`, 'error');
+            setButtonLoading(button, false);
         }
     }
 
@@ -616,25 +1092,18 @@
                 // Show corresponding content
                 const tabId = tab.getAttribute('data-tab');
                 document.getElementById(tabId).classList.add('active');
+
+                // Show notification for tab change
+                const tabName = tab.textContent.trim();
+                showNotification(`Switched to ${tabName} tab`, 'info');
             });
         });
     }
 
     // Event listeners
-    document.getElementById('simpleData').addEventListener('click', () => {
-        loadSimpleData();
-        analyzeDefault();
-    });
-
-    document.getElementById('complexData').addEventListener('click', () => {
-        loadComplexData();
-        analyzeDefault();
-    });
-
-    document.getElementById('customData').addEventListener('click', () => {
-        loadCustomData();
-        analyzeDefault();
-    });
+    document.getElementById('simpleData').addEventListener('click', loadSimpleData);
+    document.getElementById('complexData').addEventListener('click', loadComplexData);
+    document.getElementById('customData').addEventListener('click', loadCustomData);
 
     document.getElementById('analyzeWithOptions').addEventListener('click', analyzeWithOptions);
     document.getElementById('analyzeHex').addEventListener('click', analyzeHexInput);
@@ -649,8 +1118,12 @@
     // Initialize
     setupTabs();
     loadPatterns();
+
+    // Show welcome message
+    showNotification('Welcome to Unborsh WASM! Select a sample or enter your own Borsh data to get started.', 'info');
+
+    // Load simple data by default
     loadSimpleData();
-    analyzeDefault();
 </script>
 </body>
 </html>
