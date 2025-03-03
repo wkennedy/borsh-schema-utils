@@ -18,11 +18,7 @@ pub fn create_string_pattern() -> BorshPattern {
                 if len as usize + 4 <= bytes.len() {
                     let str_bytes = &bytes[4..4 + len as usize];
                     if let Ok(s) = std::str::from_utf8(str_bytes) {
-                        let display_str = if s.len() > 30 {
-                            format!("\"{}...\"", &s[0..30])
-                        } else {
-                            format!("\"{}\"", s)
-                        };
+                        let display_str = format!("\"{}\"", s);
                         return Some(format!("String: {}", display_str));
                     }
                 }

@@ -64,11 +64,7 @@ impl ProbabilisticAnalyzer {
                     let ascii_ratio = content.iter().filter(|&&b| b >= 32 && b <= 126).count() as f32 / content.len() as f32;
                     let string_confidence = 70 + (ascii_ratio * 20.0) as u8;
 
-                    let display_str = if s.len() > 30 {
-                        format!("\"{}...\"", &s[0..30])
-                    } else {
-                        format!("\"{}\"", s)
-                    };
+                    let display_str = format!("\"{}\"", s);
 
                     candidates.push(("String".to_string(), 4 + value as usize, string_confidence, display_str));
                 } else {
@@ -173,7 +169,7 @@ impl ProbabilisticAnalyzer {
                 // Try string interpretation
                 if let Ok(s) = std::str::from_utf8(content) {
                     let display_str = if s.len() > 30 {
-                        format!("\"{}...\"", &s[0..30])
+                        format!("\"{}\"", &s[0..30])
                     } else {
                         format!("\"{}\"", s)
                     };

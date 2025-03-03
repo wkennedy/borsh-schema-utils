@@ -41,7 +41,7 @@ pub fn create_signature_pattern() -> BorshPattern {
                 // Check for high entropy (typical of signatures)
                 let unique_bytes = bytes[..64].iter().collect::<std::collections::HashSet<_>>().len();
                 if unique_bytes > 40 {
-                    Some(format!("Probable signature: {}...", hex::encode(&bytes[..16])))
+                    Some(format!("Probable signature: {}", hex::encode(&bytes[..16])))
                 } else {
                     None
                 }
@@ -381,9 +381,9 @@ pub fn create_solana_account_pattern() -> BorshPattern {
 
                     if unique_bytes > 20 {
                         return Some(format!(
-                            "Possible Solana account (discriminator: {}, authority: {}...)",
+                            "Possible Solana account (discriminator: {}, authority: {})",
                             hex::encode(discrim),
-                            hex::encode(&potential_pubkey[..8])
+                            hex::encode(&potential_pubkey[..])
                         ));
                     }
                 }

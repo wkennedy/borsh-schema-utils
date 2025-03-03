@@ -1,9 +1,5 @@
 # unborsh
 
-[![Crates.io](https://img.shields.io/crates/v/unborsh.svg)](https://crates.io/crates/unborsh)
-[![Documentation](https://docs.rs/unborsh/badge.svg)](https://docs.rs/unborsh)
-[![License](https://img.shields.io/crates/l/unborsh.svg)](LICENSE)
-
 Tools for analyzing and reverse-engineering [Borsh](https://borsh.io) serialized data without requiring the original schema.
 
 ## Overview
@@ -157,12 +153,3 @@ Enable all features:
 [dependencies]
 unborsh = { version = "0.1.0", features = ["all"] }
 ```
-
-## License
-
-This project is licensed under either of:
-
-- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or https://www.apache.org/licenses/LICENSE-2.0)
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or https://opensource.org/licenses/MIT)
-
-at your option.

@@ -2,9 +2,9 @@
 name = "unborsh"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Will Kennedy"]
 description = "Tools for analyzing and reverse-engineering Borsh serialized data"
-repository = "https://github.com/yourusername/unborsh"
+repository = "https://github.com/wkennedy/borsh-schema-utils"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 keywords = ["borsh", "serialization", "analysis", "reverse-engineering", "blockchain"]

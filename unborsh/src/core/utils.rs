@@ -168,11 +168,5 @@ pub fn hex_format(data: &[u8], max_len: usize) -> String {
         return "".to_string();
     }
 
-    let hex = hex::encode(data);
-
-    if hex.len() <= max_len * 2 {
-        hex
-    } else {
-        format!("{}...", &hex[0..max_len * 2])
-    }
+    hex::encode(data)
 }

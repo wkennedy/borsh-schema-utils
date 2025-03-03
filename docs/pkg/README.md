@@ -1,6 +1,6 @@
 # unborsh-wasm
 
-WebAssembly bindings for [unborsh](https://github.com/yourusername/unborsh) - a tool for analyzing and reverse-engineering [Borsh](https://borsh.io) serialized data.
+WebAssembly bindings for [unborsh](https://github.com/wkennedy/borsh-schema-utils) - a tool for analyzing and reverse-engineering [Borsh](https://borsh.io) serialized data.
 
 ## Overview
 
@@ -31,8 +31,8 @@ yarn add unborsh-wasm
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/unborsh.git
-cd unborsh/unborsh-wasm
+git clone https://github.com/wkennedy/borsh-schema-utils.git
+cd borsh-schema-utils/unborsh-wasm
 
 # Install development dependencies
 npm install
