@@ -80,8 +80,7 @@ pub fn analyze(data: &[u8]) -> AnalysisResult {
 
 /// Analyze Borsh-serialized data with a specific strategy
 pub fn analyze_with_strategy(data: &[u8], strategy: AnalysisStrategy) -> AnalysisResult {
-    let mut options = AnalysisOptions::default();
-    options.strategy = strategy;
+    let options = AnalysisOptions { strategy, ..Default::default() };
     analyze_with_options(data, options)
 }
 
@@ -127,7 +126,7 @@ pub fn analyze_hex(hex_str: &str) -> Result<AnalysisResult, hex::FromHexError> {
 }
 
 /// Analyze Base64-encoded data
-#[cfg(feature = "base64")]
+#[cfg(feature = "base64_support")]
 pub fn analyze_base64(base64_str: &str) -> Result<AnalysisResult, base64::DecodeError> {
     use base64::Engine;
     let data = base64::engine::general_purpose::STANDARD.decode(base64_str)?;

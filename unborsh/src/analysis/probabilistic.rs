@@ -59,7 +59,7 @@ impl ProbabilisticAnalyzer {
                 // Check if this could be a string
                 if let Ok(s) = std::str::from_utf8(content) {
                     // ASCII strings have higher confidence
-                    let ascii_ratio = content.iter().filter(|&&b| b >= 32 && b <= 126).count()
+                    let ascii_ratio = content.iter().filter(|&&b| (32..=126).contains(&b)).count()
                         as f32
                         / content.len() as f32;
                     let string_confidence = 70 + (ascii_ratio * 20.0) as u8;
@@ -243,7 +243,7 @@ impl ProbabilisticAnalyzer {
             }
         }
 
-        result.push_str("}");
+        result.push('}');
 
         // Check if first byte looks like enum variant
         if !field_candidates.is_empty() {
@@ -290,7 +290,7 @@ impl BorshAnalyzer for ProbabilisticAnalyzer {
                 let remaining = &data[current_offset..];
 
                 // Skip if we have too little data left
-                if remaining.len() < 1 {
+                if remaining.is_empty() {
                     break;
                 }
 

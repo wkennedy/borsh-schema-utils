@@ -28,6 +28,7 @@ impl ComprehensiveAnalyzer {
 
     /// Custom result merging with weighted confidence
     fn merge_results(&self, results: Vec<AnalysisResult>) -> AnalysisResult {
+        let _analyzer_name = self.composite.name();
         if results.is_empty() {
             return AnalysisResult::new(vec![], None, 0, "No analysis results to merge");
         }
@@ -107,6 +108,7 @@ impl ComprehensiveAnalyzer {
     }
 
     /// Generate a comprehensive structure hypothesis
+    #[allow(dead_code)]
     fn generate_hypothesis(&self, matches: &[PatternMatch]) -> String {
         let mut result = String::new();
 

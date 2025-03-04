@@ -69,7 +69,7 @@ impl PatternAnalyzer {
             ));
         }
 
-        result.push_str("}");
+        result.push('}');
         Some(result)
     }
 }

@@ -54,7 +54,7 @@ impl Visualizer for AsciiVisualizer {
                 output.push_str(&format!(
                     "│ {}{} {}\n",
                     indent,
-                    "●".to_string(),
+                    "●",
                     m.pattern_name
                 ));
 
@@ -135,8 +135,7 @@ fn determine_nesting_levels(matches: &[PatternMatch]) -> HashMap<usize, usize> {
         let mut level = 0;
 
         // Check if this match is contained within any previous match
-        for j in 0..i {
-            let potential_parent = &matches[j];
+        for potential_parent in matches.iter().take(i) {
             let parent_end = potential_parent.offset + potential_parent.length;
 
             // If this match is fully contained within a potential parent
@@ -163,13 +162,4 @@ fn format_bytes(bytes: &[u8]) -> String {
         .map(|b| format!("{:02x}", b))
         .collect::<Vec<_>>()
         .join(" ")
-}
-
-/// Render an ASCII visualization of the analysis results
-pub fn render_ascii_visualization(
-    results: &AnalysisResult,
-    data: &[u8],
-    options: &VisualizationOptions,
-) -> String {
-    AsciiVisualizer {}.render(results, data, options)
 }

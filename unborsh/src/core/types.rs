@@ -54,7 +54,7 @@ impl BorshPattern {
             return false;
         }
 
-        for i in 0..self.binary_pattern.len() {
+        for (i, _byte) in bytes.iter().enumerate().take(self.binary_pattern.len()) {
             // For bytes where mask is 0xFF, do exact comparison
             // For bytes where mask is 0x00, accept any value
             if self.mask[i] == 0xFF && bytes[i] != self.binary_pattern[i] {
@@ -326,7 +326,7 @@ impl AnalysisResult {
             ));
         }
 
-        result.push_str("}");
+        result.push('}');
         result
     }
 }

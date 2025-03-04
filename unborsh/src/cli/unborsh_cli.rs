@@ -311,7 +311,7 @@ fn read_input(input: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
         || (input.len() > 4 && input.chars().all(|c| c.is_ascii_hexdigit()))
     {
         // Handle hex input
-        let hex_str = if input.starts_with("0x") {
+        let hex_str = if let Some(_stripped) = input.strip_prefix("0x") {
             &input[2..]
         } else {
             input
@@ -415,7 +415,7 @@ fn print_hex_output(data: &[u8], result: &AnalysisResult) {
         print!(" |");
         for (i, &byte) in chunk.iter().enumerate() {
             let byte_idx = line_idx * BYTES_PER_LINE + i;
-            let char_to_print = if byte >= 32 && byte <= 126 {
+            let char_to_print = if (32..=126).contains(&byte) {
                 byte as char
             } else {
                 '.'

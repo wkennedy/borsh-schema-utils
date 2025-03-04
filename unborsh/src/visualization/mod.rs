@@ -43,20 +43,15 @@ impl Default for VisualizationOptions {
 }
 
 /// Color theme for visualizations
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ColorTheme {
     /// Light theme (dark text on light background)
+    #[default]
     Light,
     /// Dark theme (light text on dark background)
     Dark,
     /// High contrast theme
     HighContrast,
-}
-
-impl Default for ColorTheme {
-    fn default() -> Self {
-        ColorTheme::Dark
-    }
 }
 
 /// Visualization format

@@ -419,7 +419,7 @@ pub fn create_solana_account_pattern() -> BorshPattern {
                         return Some(format!(
                             "Possible Solana account (discriminator: {}, authority: {})",
                             hex::encode(discrim),
-                            hex::encode(&potential_pubkey[..])
+                            hex::encode(potential_pubkey)
                         ));
                     }
                 }

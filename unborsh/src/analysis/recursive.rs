@@ -14,9 +14,8 @@ impl RecursiveAnalyzer {
 
     /// Recursively analyze a data structure
     fn analyze_recursively(
-        &self,
         data: &[u8],
-        dictionary: &PatternDictionary,
+        _dictionary: &PatternDictionary,
         options: &AnalysisOptions,
         depth: usize,
         parent_offset: usize,
@@ -46,9 +45,9 @@ impl RecursiveAnalyzer {
             // Recursively analyze the variant data
             if data.len() > 1 {
                 let variant_data = &data[1..];
-                let variant_matches = self.analyze_recursively(
+                let variant_matches = RecursiveAnalyzer::analyze_recursively(
                     variant_data,
-                    dictionary,
+                    _dictionary,
                     options,
                     depth + 1,
                     parent_offset + 1,
@@ -84,9 +83,9 @@ impl RecursiveAnalyzer {
 
                     // Recursively analyze any remaining data
                     if !remainder.is_empty() {
-                        let remainder_matches = self.analyze_recursively(
+                        let remainder_matches = RecursiveAnalyzer::analyze_recursively(
                             remainder,
-                            dictionary,
+                            _dictionary,
                             options,
                             depth + 1,
                             parent_offset + 4 + len as usize,
@@ -125,9 +124,9 @@ impl RecursiveAnalyzer {
                             let start = i * elem_size;
                             if start + elem_size <= content.len() {
                                 let element = &content[start..start + elem_size];
-                                let element_matches = self.analyze_recursively(
+                                let element_matches = RecursiveAnalyzer::analyze_recursively(
                                     element,
-                                    dictionary,
+                                    _dictionary,
                                     options,
                                     depth + 2,
                                     parent_offset + 4 + start,
@@ -146,9 +145,9 @@ impl RecursiveAnalyzer {
 
                 // Recursively analyze any remaining data
                 if !remainder.is_empty() {
-                    let remainder_matches = self.analyze_recursively(
+                    let remainder_matches = RecursiveAnalyzer::analyze_recursively(
                         remainder,
-                        dictionary,
+                        _dictionary,
                         options,
                         depth + 1,
                         parent_offset + 4 + len as usize,
@@ -177,9 +176,9 @@ impl RecursiveAnalyzer {
             });
 
             if data.len() > 4 {
-                let remainder_matches = self.analyze_recursively(
+                let remainder_matches = RecursiveAnalyzer::analyze_recursively(
                     &data[4..],
-                    dictionary,
+                    _dictionary,
                     options,
                     depth + 1,
                     parent_offset + 4,
@@ -201,8 +200,7 @@ impl RecursiveAnalyzer {
         let mut result = String::new();
 
         if matches
-            .first()
-            .map_or(false, |m| m.pattern_name == "EnumVariant")
+            .first().is_some_and(|m| m.pattern_name == "EnumVariant")
         {
             let variant = matches.first().unwrap().interpretation.clone();
             result.push_str(&format!(
@@ -218,8 +216,7 @@ impl RecursiveAnalyzer {
 
         // Add fields, skipping the enum variant if present
         let start_idx = if matches
-            .first()
-            .map_or(false, |m| m.pattern_name == "EnumVariant")
+            .first().is_some_and(|m| m.pattern_name == "EnumVariant")
         {
             1
         } else {
@@ -233,7 +230,7 @@ impl RecursiveAnalyzer {
             ));
         }
 
-        result.push_str("}");
+        result.push('}');
         Some(result)
     }
 }
@@ -253,7 +250,7 @@ impl BorshAnalyzer for RecursiveAnalyzer {
         dictionary: &PatternDictionary,
         options: &AnalysisOptions,
     ) -> AnalysisResult {
-        let matches = self.analyze_recursively(data, dictionary, options, 0, 0);
+        let matches = RecursiveAnalyzer::analyze_recursively(data, dictionary, options, 0, 0);
 
         // Filter matches by confidence threshold
         let filtered_matches: Vec<_> = matches

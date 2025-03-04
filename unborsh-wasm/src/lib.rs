@@ -1,3 +1,4 @@
+use base64::Engine;
 use wasm_bindgen::prelude::*;
 use js_sys::{Array, Object, Uint8Array, Error as JsError};
 use serde::{Serialize, Deserialize};
@@ -26,6 +27,7 @@ fn uint8array_to_vec(array: &Uint8Array) -> Vec<u8> {
 
 /// Options for the Borsh analysis
 #[wasm_bindgen]
+#[derive(Default)]
 pub struct JsAnalysisOptions {
     strategy: u8,
     max_depth: u32,
@@ -79,21 +81,6 @@ impl JsAnalysisOptions {
     pub fn max_matches(mut self, max: Option<u32>) -> Self {
         self.max_matches = max;
         self
-    }
-
-    fn to_rust_options(&self) -> AnalysisOptions {
-        AnalysisOptions {
-            strategy: match self.strategy {
-                0 => AnalysisStrategy::Pattern,
-                1 => AnalysisStrategy::Recursive,
-                2 => AnalysisStrategy::Probabilistic,
-                _ => AnalysisStrategy::Comprehensive,
-            },
-            max_depth: self.max_depth as usize,
-            min_confidence: self.min_confidence,
-            include_raw_bytes: self.include_raw_bytes,
-            max_matches: self.max_matches.map(|m| m as usize),
-        }
     }
 }
 
@@ -150,7 +137,7 @@ pub fn analyze_borsh(data: &Uint8Array) -> Result<JsValue, JsError> {
 
     match serde_json::to_string(&js_result) {
         Ok(json_str) => Ok(JsValue::from_str(&json_str)),
-        Err(e) => Err(JsError::new(&format!("Failed to serialize result: {}", e)).into())
+        Err(e) => Err(JsError::new(&format!("Failed to serialize result: {}", e)))
     }
 }
 
@@ -171,7 +158,7 @@ pub fn analyze_borsh_with_strategy(data: &Uint8Array, strategy: u8) -> Result<Js
 
     match serde_json::to_string(&js_result) {
         Ok(json_str) => Ok(JsValue::from_str(&json_str)),
-        Err(e) => Err(JsError::new(&format!("Failed to serialize result: {}", e)).into())
+        Err(e) => Err(JsError::new(&format!("Failed to serialize result: {}", e)))
     }
 }
 
@@ -198,16 +185,16 @@ pub fn analyze_borsh_with_options(data: &Uint8Array, strategy: u8, max_depth: u3
 
     match serde_json::to_string(&js_result) {
         Ok(json_str) => Ok(JsValue::from_str(&json_str)),
-        Err(e) => Err(JsError::new(&format!("Failed to serialize result: {}", e)).into())
+        Err(e) => Err(JsError::new(&format!("Failed to serialize result: {}", e)))
     }
 }
 
 /// Analyze base64-encoded Borsh data
 #[wasm_bindgen]
 pub fn analyze_borsh_base64(base64_str: &str) -> Result<JsValue, JsError> {
-    let data_vec = match base64::decode(base64_str) {
+    let data_vec = match base64::engine::general_purpose::STANDARD.decode(base64_str) {
         Ok(data) => data,
-        Err(e) => return Err(JsError::new(&format!("Failed to decode base64: {}", e)).into())
+        Err(e) => return Err(JsError::new(&format!("Failed to decode base64: {}", e)))
     };
 
     let result = analyze(&data_vec);
@@ -215,7 +202,7 @@ pub fn analyze_borsh_base64(base64_str: &str) -> Result<JsValue, JsError> {
 
     match serde_json::to_string(&js_result) {
         Ok(json_str) => Ok(JsValue::from_str(&json_str)),
-        Err(e) => Err(JsError::new(&format!("Failed to serialize result: {}", e)).into())
+        Err(e) => Err(JsError::new(&format!("Failed to serialize result: {}", e)))
     }
 }
 
@@ -224,7 +211,7 @@ pub fn analyze_borsh_base64(base64_str: &str) -> Result<JsValue, JsError> {
 pub fn analyze_borsh_hex(hex_str: &str) -> Result<JsValue, JsError> {
     let data_vec = match hex::decode(hex_str) {
         Ok(data) => data,
-        Err(e) => return Err(JsError::new(&format!("Failed to decode hex: {}", e)).into())
+        Err(e) => return Err(JsError::new(&format!("Failed to decode hex: {}", e)))
     };
 
     let result = analyze(&data_vec);
@@ -232,7 +219,7 @@ pub fn analyze_borsh_hex(hex_str: &str) -> Result<JsValue, JsError> {
 
     match serde_json::to_string(&js_result) {
         Ok(json_str) => Ok(JsValue::from_str(&json_str)),
-        Err(e) => Err(JsError::new(&format!("Failed to serialize result: {}", e)).into())
+        Err(e) => Err(JsError::new(&format!("Failed to serialize result: {}", e)))
     }
 }
 
@@ -242,7 +229,7 @@ pub fn extract_structure_hypothesis(data: &Uint8Array) -> Result<String, JsError
     let data_vec = uint8array_to_vec(data);
     match unborsh::extract_structure_hypothesis(&data_vec) {
         Some(hypothesis) => Ok(hypothesis),
-        None => Err(JsError::new("Could not generate a structure hypothesis").into())
+        None => Err(JsError::new("Could not generate a structure hypothesis"))
     }
 }
 
@@ -252,7 +239,7 @@ pub fn interpret_as(data: &Uint8Array, type_name: &str) -> Result<String, JsErro
     let data_vec = uint8array_to_vec(data);
     match unborsh::interpret_as(&data_vec, type_name) {
         Some(interpretation) => Ok(interpretation),
-        None => Err(JsError::new(&format!("Failed to interpret data as {}", type_name)).into())
+        None => Err(JsError::new(&format!("Failed to interpret data as {}", type_name)))
     }
 }
 
@@ -284,7 +271,7 @@ pub fn get_pattern_details(pattern_name: &str) -> Result<JsValue, JsError> {
 
         Ok(details.into())
     } else {
-        Err(JsError::new(&format!("Pattern '{}' not found", pattern_name)).into())
+        Err(JsError::new(&format!("Pattern '{}' not found", pattern_name)))
     }
 }
 
@@ -296,6 +283,7 @@ mod tests {
     wasm_bindgen_test_configure!(run_in_browser);
 
     #[wasm_bindgen_test]
+    #[allow(dead_code)]
     fn test_analyze_borsh() {
         // A simple String "Hello World" in Borsh format
         let data = vec![11, 0, 0, 0, 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100];

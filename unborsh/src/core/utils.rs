@@ -1,6 +1,6 @@
 // src/core/utils.rs
 
-/// Utility functions for Borsh data analysis
+// Utility functions for Borsh data analysis
 
 /// Extracts all potential strings from a byte slice
 pub fn extract_strings(data: &[u8]) -> Vec<String> {

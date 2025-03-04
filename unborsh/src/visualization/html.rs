@@ -252,11 +252,11 @@ fn render_hex_view(
 
         // Render ASCII representation
         output.push_str("<td class=\"ascii\">");
-        for i in 0..chunk.len() {
+        for (i, byte) in chunk.iter().enumerate() {
             let byte_idx = line_offset + i;
-            let byte = chunk[i];
-            let char_to_print = if byte >= 32 && byte <= 126 {
-                byte as char
+            // let byte = chunk[i];
+            let char_to_print = if (32..=126).contains(byte) {
+                *byte as char
             } else {
                 '.'
             };
@@ -291,8 +291,7 @@ fn determine_nesting_levels(matches: &[PatternMatch]) -> HashMap<usize, usize> {
         let mut level = 0;
 
         // Check if this match is contained within any previous match
-        for j in 0..i {
-            let potential_parent = &matches[j];
+        for potential_parent in matches.iter().take(i) {
             let parent_end = potential_parent.offset + potential_parent.length;
 
             // If this match is fully contained within a potential parent
@@ -328,21 +327,4 @@ fn html_escape(text: &str) -> String {
         .replace('>', "&gt;")
         .replace('"', "&quot;")
         .replace('\'', "&#39;")
-}
-
-/// Render an HTML visualization of the analysis results
-pub fn render_html_visualization(
-    results: &AnalysisResult,
-    data: &[u8],
-    options: &VisualizationOptions,
-) -> String {
-    HtmlVisualizer {}.render(results, data, options)
-}
-
-// CSS templates
-#[cfg(test)]
-mod templates {
-    pub const DARK_CSS: &str = include_str!("templates/dark.css");
-    pub const LIGHT_CSS: &str = include_str!("templates/light.css");
-    pub const HIGH_CONTRAST_CSS: &str = include_str!("templates/high_contrast.css");
 }

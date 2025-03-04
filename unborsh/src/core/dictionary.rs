@@ -68,7 +68,7 @@ impl PatternDictionary {
     pub fn from_defaults() -> Self {
         // This is just a placeholder - actual implementation will
         // reference patterns from the patterns module
-        let dict = Self::new();
+        // let dict = Self::new();
 
         // Placeholder for importing pattern definitions
         // In the actual implementation, this would be:
@@ -79,7 +79,7 @@ impl PatternDictionary {
         // dict.add_pattern(create_u16_pattern());
         // etc.
 
-        dict
+        Self::new()
     }
 
     /// Merge multiple dictionaries into one
@@ -127,7 +127,7 @@ impl fmt::Display for PatternDictionary {
 
         for (i, pattern) in self.patterns.iter().enumerate() {
             if i > 0 {
-                writeln!(f, "")?;
+                writeln!(f)?;
             }
             write!(f, "{}", pattern)?;
         }
