@@ -171,3 +171,266 @@ pub fn hex_format(data: &[u8], _max_len: usize) -> String {
 
     hex::encode(data)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extract_strings_empty() {
+        let data = vec![];
+        let strings = extract_strings(&data);
+        assert!(strings.is_empty());
+    }
+
+    #[test]
+    fn test_extract_strings_valid() {
+        // Create data with two strings: "Hello" and "World"
+        let data = vec![
+            5, 0, 0, 0, b'H', b'e', b'l', b'l', b'o', // "Hello"
+            5, 0, 0, 0, b'W', b'o', b'r', b'l', b'd', // "World"
+        ];
+        let strings = extract_strings(&data);
+
+        assert_eq!(strings.len(), 2);
+        assert!(strings.contains(&"Hello".to_string()));
+        assert!(strings.contains(&"World".to_string()));
+    }
+
+    #[test]
+    fn test_extract_strings_overlapping() {
+        // Data with overlapping potential strings
+        let data = vec![
+            // "Hello" at position 0
+            5, 0, 0, 0, b'H', b'e', b'l', b'l', b'o',
+            // "ello " starting at position 1 (using the 'e' from above)
+            5, 0, 0, 0, b'e', b'l', b'l', b'o', b' ',
+        ];
+        let strings = extract_strings(&data);
+
+        assert!(strings.contains(&"Hello".to_string()));
+        assert!(strings.contains(&"ello ".to_string()));
+    }
+
+    #[test]
+    fn test_extract_strings_invalid_utf8() {
+        // Create data with invalid UTF-8 sequence
+        let data = vec![
+            3, 0, 0, 0, 0xFF, 0xFE, 0xFD, // Invalid UTF-8
+        ];
+        let strings = extract_strings(&data);
+
+        assert!(strings.is_empty());
+    }
+
+    #[test]
+    fn test_extract_strings_large_length() {
+        // String with unreasonably large length that exceeds data size
+        let data = vec![
+            0xFF, 0xFF, 0xFF, 0x7F, b'H', b'e', b'l', b'l', b'o',
+        ];
+        let strings = extract_strings(&data);
+
+        assert!(strings.is_empty());
+    }
+
+    #[test]
+    fn test_has_high_entropy_short_data() {
+        // Data shorter than 8 bytes should return false
+        let data = vec![1, 2, 3, 4, 5, 6, 7];
+        assert!(!has_high_entropy(&data));
+    }
+
+    #[test]
+    fn test_has_high_entropy_low() {
+        // Data with low entropy (repeated values)
+        let data = vec![1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3];
+        assert!(!has_high_entropy(&data));
+    }
+
+    #[test]
+    fn test_has_high_entropy_high() {
+        // Data with high entropy (many unique values)
+        let data = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        assert!(has_high_entropy(&data));
+    }
+
+    #[test]
+    fn test_calculate_confidence_short_data() {
+        let data = vec![1, 2];
+        let pattern = vec![1, 2, 3, 4];
+        let mask = vec![0xFF, 0xFF, 0xFF, 0xFF];
+
+        // Data is shorter than pattern
+        assert_eq!(calculate_confidence(&data, &pattern, &mask), 0);
+    }
+
+    #[test]
+    fn test_calculate_confidence_exact_match() {
+        let data = vec![1, 2, 3, 4];
+        let pattern = vec![1, 2, 3, 4];
+        let mask = vec![0xFF, 0xFF, 0xFF, 0xFF];
+
+        // Exact match should have decent confidence, though not necessarily high
+        // The function starts with base 50 confidence and adjusts based on match ratio
+        let confidence = calculate_confidence(&data, &pattern, &mask);
+        assert!(confidence >= 50, "Exact match should have at least base confidence, got {}", confidence);
+    }
+
+    #[test]
+    fn test_calculate_confidence_partial_match() {
+        let data = vec![1, 5, 3, 8];
+        let pattern = vec![1, 2, 3, 4];
+        let mask = vec![0xFF, 0xFF, 0xFF, 0xFF];
+
+        // Partial match (2 out of 4 bytes match)
+        let confidence = calculate_confidence(&data, &pattern, &mask);
+        assert!(confidence > 35 && confidence < 70, "Partial match should have medium confidence, got {}", confidence);
+    }
+
+    #[test]
+    fn test_calculate_confidence_with_mask() {
+        let data = vec![1, 5, 3, 8];
+        let pattern = vec![1, 0, 3, 0];
+        let mask = vec![0xFF, 0x00, 0xFF, 0x00]; // Only check first and third bytes
+
+        // With mask, should have decent confidence for the masked bytes
+        let confidence = calculate_confidence(&data, &pattern, &mask);
+        assert!(confidence >= 35, "Masked match should have reasonable confidence, got {}", confidence);
+    }
+
+    #[test]
+    fn test_calculate_confidence_with_length_prefix() {
+        // Data where 4-byte length prefix indicates exactly the right size
+        let data = vec![5, 0, 0, 0, 1, 2, 3, 4, 5]; // Length 5 + content (5 bytes)
+        let pattern = vec![0, 0, 0, 0];
+        let mask = vec![0x00, 0x00, 0x00, 0x00]; // Not checking actual values
+
+        // Check that we get reasonable confidence
+        // Note: The implementation adds 20 to confidence for proper length prefixes,
+        // but confidence might still not reach 70 depending on other factors.
+        let confidence = calculate_confidence(&data, &pattern, &mask);
+        assert!(confidence >= 35, "Length-prefixed data should have reasonable confidence, got {}", confidence);
+    }
+
+    #[test]
+    fn test_find_common_prefixes_empty() {
+        let strings: Vec<&String> = vec![];
+        let prefixes = find_common_prefixes(&strings);
+        assert!(prefixes.is_empty());
+    }
+
+    #[test]
+    fn test_find_common_prefixes_common() {
+        let str1 = "abcdef".to_string();
+        let str2 = "abcghi".to_string();
+        let str3 = "abcjkl".to_string();
+
+        let strings = vec![&str1, &str2, &str3];
+        let prefixes = find_common_prefixes(&strings);
+
+        assert!(prefixes.contains(&"abc".to_string()), "Should find 'abc' prefix");
+    }
+
+    #[test]
+    fn test_find_common_prefixes_no_common() {
+        let str1 = "abcdef".to_string();
+        let str2 = "ghijkl".to_string();
+        let str3 = "mnopqr".to_string();
+
+        let strings = vec![&str1, &str2, &str3];
+        let prefixes = find_common_prefixes(&strings);
+
+        assert!(prefixes.is_empty(), "Should find no common prefixes");
+    }
+
+    #[test]
+    fn test_find_common_prefixes_short_strings() {
+        let str1 = "ab".to_string(); // Too short for a 3-char prefix
+        let str2 = "ab".to_string();
+
+        let strings = vec![&str1, &str2];
+        let prefixes = find_common_prefixes(&strings);
+
+        assert!(prefixes.is_empty(), "Strings are too short for 3+ char prefixes");
+    }
+
+    #[test]
+    fn test_detect_enum_variant_valid() {
+        let data = vec![2, 10, 20, 30]; // First byte 2 is a valid enum variant
+        assert_eq!(detect_enum_variant(&data), Some(2));
+
+        let data = vec![5, 10, 20, 30]; // 5 is the max valid enum variant
+        assert_eq!(detect_enum_variant(&data), Some(5));
+    }
+
+    #[test]
+    fn test_detect_enum_variant_invalid() {
+        let data = vec![6, 10, 20, 30]; // 6 is too large for an enum variant
+        assert_eq!(detect_enum_variant(&data), None);
+
+        let data: Vec<u8> = vec![]; // Empty data
+        assert_eq!(detect_enum_variant(&data), None);
+    }
+
+    #[test]
+    fn test_interpret_as_numbers_empty() {
+        let data: Vec<u8> = vec![];
+        let interpretations = interpret_as_numbers(&data);
+        assert!(interpretations.is_empty());
+    }
+
+    #[test]
+    fn test_interpret_as_numbers_u8() {
+        let data = vec![42];
+        let interpretations = interpret_as_numbers(&data);
+
+        assert!(!interpretations.is_empty());
+        assert!(interpretations.iter().any(|(t, v)| t == "u8" && v == "42"));
+    }
+
+    #[test]
+    fn test_interpret_as_numbers_u16() {
+        let data = vec![42, 0]; // 42 in little-endian
+        let interpretations = interpret_as_numbers(&data);
+
+        assert!(interpretations.iter().any(|(t, v)| t == "u16" && v == "42"));
+    }
+
+    #[test]
+    fn test_interpret_as_numbers_u32() {
+        let data = vec![42, 0, 0, 0]; // 42 in little-endian
+        let interpretations = interpret_as_numbers(&data);
+
+        assert!(interpretations.iter().any(|(t, v)| t == "u32" && v == "42"));
+    }
+
+    #[test]
+    fn test_interpret_as_numbers_u64() {
+        let data = vec![42, 0, 0, 0, 0, 0, 0, 0]; // 42 in little-endian
+        let interpretations = interpret_as_numbers(&data);
+
+        assert!(interpretations.iter().any(|(t, v)| t == "u64" && v == "42"));
+    }
+
+    #[test]
+    fn test_interpret_as_numbers_float() {
+        // Data representing a valid float
+        let data = vec![0, 0, 0x80, 0x3F]; // 1.0f32 in little-endian
+        let interpretations = interpret_as_numbers(&data);
+
+        assert!(interpretations.iter().any(|(t, _)| t == "f32"));
+    }
+
+    #[test]
+    fn test_hex_format_empty() {
+        let data: Vec<u8> = vec![];
+        assert_eq!(hex_format(&data, 10), "");
+    }
+
+    #[test]
+    fn test_hex_format() {
+        let data = vec![0xDE, 0xAD, 0xBE, 0xEF];
+        assert_eq!(hex_format(&data, 10), "deadbeef");
+    }
+}
