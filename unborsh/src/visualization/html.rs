@@ -2,22 +2,20 @@
 
 //! HTML-based visualization of Borsh analysis results
 
-use crate::core::{
-    AnalysisResult,
-    PatternMatch,
-};
-use super::{
-    Visualizer,
-    VisualizationOptions,
-    ColorTheme,
-};
+use super::{ColorTheme, VisualizationOptions, Visualizer};
+use crate::core::{AnalysisResult, PatternMatch};
 use std::collections::HashMap;
 
 /// HTML-based visualizer
 pub struct HtmlVisualizer;
 
 impl Visualizer for HtmlVisualizer {
-    fn render(&self, results: &AnalysisResult, data: &[u8], options: &VisualizationOptions) -> String {
+    fn render(
+        &self,
+        results: &AnalysisResult,
+        data: &[u8],
+        options: &VisualizationOptions,
+    ) -> String {
         let mut output = String::new();
 
         // Start HTML document
@@ -25,7 +23,9 @@ impl Visualizer for HtmlVisualizer {
         output.push_str("<html lang=\"en\">\n");
         output.push_str("<head>\n");
         output.push_str("    <meta charset=\"UTF-8\">\n");
-        output.push_str("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
+        output.push_str(
+            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n",
+        );
         output.push_str("    <title>Borsh Structure Visualization</title>\n");
 
         // Add CSS based on the selected theme
@@ -42,9 +42,15 @@ impl Visualizer for HtmlVisualizer {
         // Add header
         output.push_str("    <div class=\"header\">\n");
         output.push_str("        <h1>Borsh Structure Visualization</h1>\n");
-        output.push_str(&format!("        <div class=\"info\">Data Size: {} bytes | Confidence: {}%</div>\n",
-                                 data.len(), results.confidence));
-        output.push_str(&format!("        <div class=\"description\">{}</div>\n", results.description));
+        output.push_str(&format!(
+            "        <div class=\"info\">Data Size: {} bytes | Confidence: {}%</div>\n",
+            data.len(),
+            results.confidence
+        ));
+        output.push_str(&format!(
+            "        <div class=\"description\">{}</div>\n",
+            results.description
+        ));
         output.push_str("    </div>\n");
 
         // Start main content area
@@ -85,32 +91,44 @@ impl Visualizer for HtmlVisualizer {
                 };
 
                 // Render field node
-                output.push_str(&format!("                <div class=\"tree-node {}\" style=\"margin-left: {}px;\">\n",
-                                         confidence_class, indent_px));
+                output.push_str(&format!(
+                    "                <div class=\"tree-node {}\" style=\"margin-left: {}px;\">\n",
+                    confidence_class, indent_px
+                ));
 
                 // Render field name and type
-                output.push_str(&format!("                    <div class=\"node-header\">{}</div>\n", m.pattern_name));
+                output.push_str(&format!(
+                    "                    <div class=\"node-header\">{}</div>\n",
+                    m.pattern_name
+                ));
 
                 // Render node content
                 output.push_str("                    <div class=\"node-content\">\n");
 
                 // Show interpretation if enabled
                 if options.show_interpretations {
-                    output.push_str(&format!("                        <div class=\"interpretation\">{}</div>\n",
-                                             html_escape(&m.interpretation)));
+                    output.push_str(&format!(
+                        "                        <div class=\"interpretation\">{}</div>\n",
+                        html_escape(&m.interpretation)
+                    ));
                 }
 
                 // Show confidence if enabled
                 if options.show_confidence {
-                    output.push_str(&format!("                        <div class=\"confidence\">Confidence: {}%</div>\n",
-                                             m.confidence));
+                    output.push_str(&format!(
+                        "                        <div class=\"confidence\">Confidence: {}%</div>\n",
+                        m.confidence
+                    ));
                 }
 
                 // Show raw bytes if enabled
                 if options.show_raw_bytes && !m.data.is_empty() {
                     let bytes_to_show = m.data.len().min(options.max_bytes_per_match);
                     let bytes_str = format_bytes_html(&m.data[..bytes_to_show]);
-                    output.push_str(&format!("                        <div class=\"raw-bytes\">Bytes: {}</div>\n", bytes_str));
+                    output.push_str(&format!(
+                        "                        <div class=\"raw-bytes\">Bytes: {}</div>\n",
+                        bytes_str
+                    ));
 
                     if bytes_to_show < m.data.len() {
                         output.push_str(&format!("                        <div class=\"bytes-more\">... ({} more bytes)</div>\n",
@@ -182,7 +200,7 @@ fn render_hex_view(
     output: &mut String,
     data: &[u8],
     offset_map: &HashMap<usize, &PatternMatch>,
-    matches: &[PatternMatch]
+    matches: &[PatternMatch],
 ) {
     // Create a map of offsets to pattern matches for coloring
     let mut byte_matches = vec![None; data.len()];
@@ -200,7 +218,10 @@ fn render_hex_view(
 
     for (line_idx, chunk) in data.chunks(BYTES_PER_LINE).enumerate() {
         let line_offset = line_idx * BYTES_PER_LINE;
-        output.push_str(&format!("                    <tr><td class=\"offset\">{:08x}</td>", line_offset));
+        output.push_str(&format!(
+            "                    <tr><td class=\"offset\">{:08x}</td>",
+            line_offset
+        ));
 
         // Render hex values
         for i in 0..16 {
@@ -250,7 +271,10 @@ fn render_hex_view(
                 None => "",
             };
 
-            output.push_str(&format!("<span class=\"{}\">{}</span>", css_class, char_to_print));
+            output.push_str(&format!(
+                "<span class=\"{}\">{}</span>",
+                css_class, char_to_print
+            ));
         }
         output.push_str("</td></tr>\n");
     }
@@ -272,9 +296,11 @@ fn determine_nesting_levels(matches: &[PatternMatch]) -> HashMap<usize, usize> {
             let parent_end = potential_parent.offset + potential_parent.length;
 
             // If this match is fully contained within a potential parent
-            if m.offset >= potential_parent.offset &&
-                m.offset + m.length <= parent_end &&
-                m.offset > potential_parent.offset { // Not the same offset
+            if m.offset >= potential_parent.offset
+                && m.offset + m.length <= parent_end
+                && m.offset > potential_parent.offset
+            {
+                // Not the same offset
                 let parent_level = *levels.get(&potential_parent.offset).unwrap_or(&0);
                 level = level.max(parent_level + 1);
             }
@@ -288,7 +314,8 @@ fn determine_nesting_levels(matches: &[PatternMatch]) -> HashMap<usize, usize> {
 
 /// Helper to format bytes as a hex string with limited length
 fn format_bytes_html(bytes: &[u8]) -> String {
-    bytes.iter()
+    bytes
+        .iter()
         .map(|b| format!("<span class=\"byte\">{:02x}</span>", b))
         .collect::<Vec<_>>()
         .join(" ")

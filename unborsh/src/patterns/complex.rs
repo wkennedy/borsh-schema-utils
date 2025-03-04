@@ -23,7 +23,7 @@ pub fn create_enum_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -38,7 +38,7 @@ pub fn create_struct_pattern() -> BorshPattern {
         |_bytes| {
             // Structs are difficult to detect generically
             Some("Possible struct data".to_string())
-        }
+        },
     )
 }
 
@@ -53,7 +53,7 @@ pub fn create_nested_struct_pattern() -> BorshPattern {
         |_bytes| {
             // Generic placeholder
             Some("Possible nested structure".to_string())
-        }
+        },
     )
 }
 
@@ -75,7 +75,7 @@ pub fn create_optional_field_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -98,7 +98,7 @@ pub fn create_variant_field_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -113,7 +113,7 @@ pub fn create_map_entry_pattern() -> BorshPattern {
         |_bytes| {
             // Generic placeholder
             Some("Possible map entry".to_string())
-        }
+        },
     )
 }
 
@@ -132,7 +132,7 @@ pub fn create_tagged_data_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -151,7 +151,7 @@ pub fn create_recursive_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -166,8 +166,7 @@ pub fn create_object_id_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 8 {
                 let id = u64::from_le_bytes([
-                    bytes[0], bytes[1], bytes[2], bytes[3],
-                    bytes[4], bytes[5], bytes[6], bytes[7],
+                    bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
                 ]);
                 Some(format!("Possible Object ID: {}", id))
             } else if bytes.len() >= 4 {
@@ -176,7 +175,7 @@ pub fn create_object_id_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -193,24 +192,26 @@ pub fn create_entity_pattern() -> BorshPattern {
                 // Try to detect an ID field followed by a length-prefixed field
                 if bytes.len() >= 8 {
                     let potential_id = u64::from_le_bytes([
-                        bytes[0], bytes[1], bytes[2], bytes[3],
-                        bytes[4], bytes[5], bytes[6], bytes[7],
+                        bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6],
+                        bytes[7],
                     ]);
 
                     if bytes.len() >= 12 {
-                        let potential_length = u32::from_le_bytes([
-                            bytes[8], bytes[9], bytes[10], bytes[11],
-                        ]);
+                        let potential_length =
+                            u32::from_le_bytes([bytes[8], bytes[9], bytes[10], bytes[11]]);
 
-                        if potential_length < 1000 && bytes.len() >= 12 + potential_length as usize {
-                            return Some(format!("Possible Entity (ID: {}, with {} properties)",
-                                                potential_id, potential_length));
+                        if potential_length < 1000 && bytes.len() >= 12 + potential_length as usize
+                        {
+                            return Some(format!(
+                                "Possible Entity (ID: {}, with {} properties)",
+                                potential_id, potential_length
+                            ));
                         }
                     }
                 }
             }
             None
-        }
+        },
     )
 }
 
@@ -232,12 +233,15 @@ pub fn create_nested_collection_pattern() -> BorshPattern {
 
                     // If there appears to be an inner length prefix
                     if inner_len < 1000 {
-                        return Some(format!("Possible nested collection with {} outer elements", outer_len));
+                        return Some(format!(
+                            "Possible nested collection with {} outer elements",
+                            outer_len
+                        ));
                     }
                 }
             }
             None
-        }
+        },
     )
 }
 
@@ -255,12 +259,14 @@ pub fn create_message_pattern() -> BorshPattern {
                 let payload_len = u32::from_le_bytes([bytes[4], bytes[5], bytes[6], bytes[7]]);
 
                 if payload_len as usize + 8 <= bytes.len() && payload_len < 100000 {
-                    return Some(format!("Possible message (type: {}, payload: {} bytes)",
-                                        msg_type, payload_len));
+                    return Some(format!(
+                        "Possible message (type: {}, payload: {} bytes)",
+                        msg_type, payload_len
+                    ));
                 }
             }
             None
-        }
+        },
     )
 }
 
@@ -279,6 +285,6 @@ pub fn create_versioned_data_pattern() -> BorshPattern {
                 return Some(format!("Possible versioned data (v{}.{})", major, minor));
             }
             None
-        }
+        },
     )
 }

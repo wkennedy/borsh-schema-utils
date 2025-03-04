@@ -2,26 +2,27 @@
 
 //! ASCII-based visualization of Borsh analysis results
 
-use crate::core::{
-    AnalysisResult,
-    PatternMatch,
-};
-use super::{
-    Visualizer,
-    VisualizationOptions,
-    ColorTheme,
-};
+use super::{ColorTheme, VisualizationOptions, Visualizer};
+use crate::core::{AnalysisResult, PatternMatch};
 use std::collections::HashMap;
 
 /// ASCII-based visualizer
 pub struct AsciiVisualizer;
 
 impl Visualizer for AsciiVisualizer {
-    fn render(&self, results: &AnalysisResult, data: &[u8], options: &VisualizationOptions) -> String {
+    fn render(
+        &self,
+        results: &AnalysisResult,
+        data: &[u8],
+        options: &VisualizationOptions,
+    ) -> String {
         let mut output = String::new();
 
         // Add header
-        output.push_str(&format!("=== Borsh Structure Visualization ({} bytes) ===\n\n", data.len()));
+        output.push_str(&format!(
+            "=== Borsh Structure Visualization ({} bytes) ===\n\n",
+            data.len()
+        ));
         output.push_str(&format!("Confidence: {}%\n", results.confidence));
         output.push_str(&format!("Analysis: {}\n\n", results.description));
 
@@ -50,7 +51,12 @@ impl Visualizer for AsciiVisualizer {
                 let indent = "│ ".repeat(*level);
 
                 // Render field name and type
-                output.push_str(&format!("│ {}{} {}\n", indent, "●".to_string(), m.pattern_name));
+                output.push_str(&format!(
+                    "│ {}{} {}\n",
+                    indent,
+                    "●".to_string(),
+                    m.pattern_name
+                ));
 
                 // Show interpretation if enabled
                 if options.show_interpretations {
@@ -66,7 +72,10 @@ impl Visualizer for AsciiVisualizer {
                         30..=49 => "★★☆☆☆",
                         _ => "★☆☆☆☆",
                     };
-                    output.push_str(&format!("│ {}  └─ Confidence: {}% {}\n", indent, m.confidence, confidence_indicator));
+                    output.push_str(&format!(
+                        "│ {}  └─ Confidence: {}% {}\n",
+                        indent, m.confidence, confidence_indicator
+                    ));
                 }
 
                 // Show raw bytes if enabled
@@ -76,12 +85,19 @@ impl Visualizer for AsciiVisualizer {
                     output.push_str(&format!("│ {}  └─ Bytes: {}\n", indent, bytes_str));
 
                     if bytes_to_show < m.data.len() {
-                        output.push_str(&format!("│ {}     └─ ... ({} more bytes)\n", indent, m.data.len() - bytes_to_show));
+                        output.push_str(&format!(
+                            "│ {}     └─ ... ({} more bytes)\n",
+                            indent,
+                            m.data.len() - bytes_to_show
+                        ));
                     }
                 }
 
                 // Add offset and length info
-                output.push_str(&format!("│ {}  └─ Offset: 0x{:x}, Length: {} bytes\n", indent, m.offset, m.length));
+                output.push_str(&format!(
+                    "│ {}  └─ Offset: 0x{:x}, Length: {} bytes\n",
+                    indent, m.offset, m.length
+                ));
 
                 // Add separator between fields
                 output.push_str("│ \n");
@@ -124,9 +140,11 @@ fn determine_nesting_levels(matches: &[PatternMatch]) -> HashMap<usize, usize> {
             let parent_end = potential_parent.offset + potential_parent.length;
 
             // If this match is fully contained within a potential parent
-            if m.offset >= potential_parent.offset &&
-                m.offset + m.length <= parent_end &&
-                m.offset > potential_parent.offset { // Not the same offset
+            if m.offset >= potential_parent.offset
+                && m.offset + m.length <= parent_end
+                && m.offset > potential_parent.offset
+            {
+                // Not the same offset
                 let parent_level = *levels.get(&potential_parent.offset).unwrap_or(&0);
                 level = level.max(parent_level + 1);
             }
@@ -140,7 +158,8 @@ fn determine_nesting_levels(matches: &[PatternMatch]) -> HashMap<usize, usize> {
 
 /// Helper to format bytes as a hex string with limited length
 fn format_bytes(bytes: &[u8]) -> String {
-    bytes.iter()
+    bytes
+        .iter()
         .map(|b| format!("{:02x}", b))
         .collect::<Vec<_>>()
         .join(" ")

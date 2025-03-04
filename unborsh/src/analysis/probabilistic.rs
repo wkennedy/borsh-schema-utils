@@ -1,13 +1,7 @@
 // src/analysis/probabilistic.rs
-
 use crate::analysis::traits::BorshAnalyzer;
-use crate::core::{
-    AnalysisOptions,
-    AnalysisResult,
-    PatternDictionary,
-    PatternMatch,
-};
 use crate::core::utils;
+use crate::core::{AnalysisOptions, AnalysisResult, PatternDictionary, PatternMatch};
 
 /// Analyzer that makes probabilistic guesses about Borsh data structure
 pub struct ProbabilisticAnalyzer;
@@ -52,7 +46,12 @@ impl ProbabilisticAnalyzer {
                 confidence -= 10; // Very large values less common unless timestamps
             }
 
-            candidates.push(("u32".to_string(), 4, confidence, format!("value: {}", value)));
+            candidates.push((
+                "u32".to_string(),
+                4,
+                confidence,
+                format!("value: {}", value),
+            ));
 
             // Check if this could be a length prefix for a string or vector
             if value as usize + 4 <= data.len() && value < 10000 {
@@ -61,15 +60,27 @@ impl ProbabilisticAnalyzer {
                 // Check if this could be a string
                 if let Ok(s) = std::str::from_utf8(content) {
                     // ASCII strings have higher confidence
-                    let ascii_ratio = content.iter().filter(|&&b| b >= 32 && b <= 126).count() as f32 / content.len() as f32;
+                    let ascii_ratio = content.iter().filter(|&&b| b >= 32 && b <= 126).count()
+                        as f32
+                        / content.len() as f32;
                     let string_confidence = 70 + (ascii_ratio * 20.0) as u8;
 
                     let display_str = format!("\"{}\"", s);
 
-                    candidates.push(("String".to_string(), 4 + value as usize, string_confidence, display_str));
+                    candidates.push((
+                        "String".to_string(),
+                        4 + value as usize,
+                        string_confidence,
+                        display_str,
+                    ));
                 } else {
                     // Could be a Vec<u8> or other binary data
-                    candidates.push(("Vec<u8>".to_string(), 4 + value as usize, 65, format!("{} bytes", value)));
+                    candidates.push((
+                        "Vec<u8>".to_string(),
+                        4 + value as usize,
+                        65,
+                        format!("{} bytes", value),
+                    ));
                 }
             }
         }
@@ -77,8 +88,7 @@ impl ProbabilisticAnalyzer {
         // Try u64 field (8 bytes)
         if data.len() >= 8 {
             let value = u64::from_le_bytes([
-                data[0], data[1], data[2], data[3],
-                data[4], data[5], data[6], data[7]
+                data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
             ]);
 
             let mut confidence = 55; // Base confidence for u64
@@ -88,7 +98,12 @@ impl ProbabilisticAnalyzer {
                 confidence -= 5; // Zero could be padding, but sometimes legitimate
             }
 
-            candidates.push(("u64".to_string(), 8, confidence, format!("value: {}", value)));
+            candidates.push((
+                "u64".to_string(),
+                8,
+                confidence,
+                format!("value: {}", value),
+            ));
         }
 
         // Try boolean (1 byte but only values 0 or 1)
@@ -101,9 +116,15 @@ impl ProbabilisticAnalyzer {
         candidates.sort_by(|a, b| b.2.cmp(&a.2));
 
         // Return the most likely candidate, or a default if none found
-        candidates.first()
+        candidates
+            .first()
             .map(|(t, l, c, d)| (t.clone(), *l, *c, d.clone()))
-            .unwrap_or(("unknown".to_string(), 1, 0, "Unknown field type".to_string()))
+            .unwrap_or((
+                "unknown".to_string(),
+                1,
+                0,
+                "Unknown field type".to_string(),
+            ))
     }
 
     /// Identify known patterns in the data
@@ -145,7 +166,8 @@ impl ProbabilisticAnalyzer {
 
                     // Recursively analyze the contained value
                     if data.len() > 1 {
-                        let (inner_type, inner_len, confidence, desc) = self.identify_most_likely_field(&data[1..]);
+                        let (inner_type, inner_len, confidence, desc) =
+                            self.identify_most_likely_field(&data[1..]);
                         matches.push(PatternMatch {
                             pattern_name: inner_type,
                             offset: 1,
@@ -155,7 +177,7 @@ impl ProbabilisticAnalyzer {
                             confidence,
                         });
                     }
-                },
+                }
                 _ => {}
             }
         }
@@ -200,7 +222,10 @@ impl ProbabilisticAnalyzer {
     }
 
     /// Generate structure hypothesis from probabilistic analysis
-    fn generate_hypothesis(&self, field_candidates: &[(usize, String, usize, u8, String)]) -> Option<String> {
+    fn generate_hypothesis(
+        &self,
+        field_candidates: &[(usize, String, usize, u8, String)],
+    ) -> Option<String> {
         if field_candidates.is_empty() {
             return None;
         }
@@ -210,7 +235,10 @@ impl ProbabilisticAnalyzer {
         for (i, (_, field_type, _, confidence, _)) in field_candidates.iter().enumerate() {
             // Skip very low confidence fields
             if *confidence < 30 {
-                result.push_str(&format!("    field_{}: {}, // Low confidence ({}%)\n", i, field_type, confidence));
+                result.push_str(&format!(
+                    "    field_{}: {}, // Low confidence ({}%)\n",
+                    i, field_type, confidence
+                ));
             } else {
                 result.push_str(&format!("    field_{}: {},\n", i, field_type));
             }
@@ -239,7 +267,12 @@ impl BorshAnalyzer for ProbabilisticAnalyzer {
         "Analyzes Borsh data using probabilistic pattern detection"
     }
 
-    fn analyze(&self, data: &[u8], dictionary: &PatternDictionary, options: &AnalysisOptions) -> AnalysisResult {
+    fn analyze(
+        &self,
+        data: &[u8],
+        dictionary: &PatternDictionary,
+        options: &AnalysisOptions,
+    ) -> AnalysisResult {
         let mut field_candidates = Vec::new();
         let mut current_offset = 0;
 
@@ -263,10 +296,17 @@ impl BorshAnalyzer for ProbabilisticAnalyzer {
                 }
 
                 // Identify the most likely field type at the current offset
-                let (field_type, field_length, confidence, description) = self.identify_most_likely_field(remaining);
+                let (field_type, field_length, confidence, description) =
+                    self.identify_most_likely_field(remaining);
 
                 // Record this candidate
-                field_candidates.push((current_offset, field_type.clone(), field_length, confidence, description.clone()));
+                field_candidates.push((
+                    current_offset,
+                    field_type.clone(),
+                    field_length,
+                    confidence,
+                    description.clone(),
+                ));
 
                 // Add as a match
                 if confidence >= options.min_confidence {
@@ -306,7 +346,10 @@ impl BorshAnalyzer for ProbabilisticAnalyzer {
             matches: limited_matches,
             structure_hypothesis,
             confidence,
-            description: format!("Probabilistic analysis found {} likely fields", field_candidates.len()),
+            description: format!(
+                "Probabilistic analysis found {} likely fields",
+                field_candidates.len()
+            ),
         }
     }
 }

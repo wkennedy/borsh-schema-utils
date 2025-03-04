@@ -1,12 +1,6 @@
 // src/analysis/pattern.rs
-
 use crate::analysis::traits::BorshAnalyzer;
-use crate::core::{
-    AnalysisOptions,
-    AnalysisResult,
-    PatternDictionary,
-    PatternMatch,
-};
+use crate::core::{AnalysisOptions, AnalysisResult, PatternDictionary, PatternMatch};
 
 /// Analyzer that uses pattern matching against a dictionary
 pub struct PatternAnalyzer;
@@ -69,7 +63,10 @@ impl PatternAnalyzer {
         let mut result = String::from("struct DetectedStructure {\n");
 
         for (i, m) in matches.iter().enumerate() {
-            result.push_str(&format!("    field_{}: {}, // {}\n", i, m.pattern_name, m.interpretation));
+            result.push_str(&format!(
+                "    field_{}: {}, // {}\n",
+                i, m.pattern_name, m.interpretation
+            ));
         }
 
         result.push_str("}");
@@ -86,15 +83,20 @@ impl BorshAnalyzer for PatternAnalyzer {
         "Analyzes Borsh data by matching against known patterns in a dictionary"
     }
 
-    fn analyze(&self, data: &[u8], dictionary: &PatternDictionary, options: &AnalysisOptions) -> AnalysisResult {
+    fn analyze(
+        &self,
+        data: &[u8],
+        dictionary: &PatternDictionary,
+        options: &AnalysisOptions,
+    ) -> AnalysisResult {
         let mut matches = Vec::new();
         let mut offset = 0;
 
         // Try to find matches at each offset
         while offset < data.len() {
-            if let Some(pattern_match) = self.match_patterns_at_offset(
-                data, offset, dictionary, options.include_raw_bytes
-            ) {
+            if let Some(pattern_match) =
+                self.match_patterns_at_offset(data, offset, dictionary, options.include_raw_bytes)
+            {
                 // Only include matches that meet the confidence threshold
                 let pattern_match_len = pattern_match.length;
                 if pattern_match.confidence >= options.min_confidence {

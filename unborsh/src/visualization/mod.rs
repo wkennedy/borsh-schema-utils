@@ -11,10 +11,7 @@ mod html;
 pub use ascii::render_ascii_visualization;
 pub use html::render_html_visualization;
 
-use crate::core::{
-    AnalysisResult,
-    PatternMatch,
-};
+use crate::core::{AnalysisResult, PatternMatch};
 use std::io::Write;
 
 /// Configuration options for visualization
@@ -76,10 +73,21 @@ pub enum VisualizationFormat {
 /// Common trait for visualizers
 pub trait Visualizer {
     /// Render a visualization of analysis results
-    fn render(&self, results: &AnalysisResult, data: &[u8], options: &VisualizationOptions) -> String;
+    fn render(
+        &self,
+        results: &AnalysisResult,
+        data: &[u8],
+        options: &VisualizationOptions,
+    ) -> String;
 
     /// Render to a writer (file, stdout, etc.)
-    fn render_to(&self, results: &AnalysisResult, data: &[u8], writer: &mut dyn Write, options: &VisualizationOptions) -> std::io::Result<()> {
+    fn render_to(
+        &self,
+        results: &AnalysisResult,
+        data: &[u8],
+        writer: &mut dyn Write,
+        options: &VisualizationOptions,
+    ) -> std::io::Result<()> {
         let output = self.render(results, data, options);
         writer.write_all(output.as_bytes())?;
         Ok(())

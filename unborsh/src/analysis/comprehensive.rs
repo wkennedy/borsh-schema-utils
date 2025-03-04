@@ -1,13 +1,7 @@
 // src/analysis/comprehensive.rs
-
 use crate::analysis::traits::{BorshAnalyzer, CompositeAnalyzer};
-use crate::analysis::{pattern, recursive, probabilistic};
-use crate::core::{
-    AnalysisOptions,
-    AnalysisResult,
-    PatternDictionary,
-    PatternMatch,
-};
+use crate::analysis::{pattern, probabilistic, recursive};
+use crate::core::{AnalysisOptions, AnalysisResult, PatternDictionary, PatternMatch};
 
 /// Analyzer that combines all approaches for the most comprehensive results
 pub struct ComprehensiveAnalyzer {
@@ -63,7 +57,8 @@ impl ComprehensiveAnalyzer {
                 _ => "Unknown",
             };
 
-            let weight = weights.iter()
+            let weight = weights
+                .iter()
                 .find(|(name, _)| *name == analyzer_name)
                 .map(|(_, w)| *w)
                 .unwrap_or(1.0);
@@ -103,7 +98,12 @@ impl ComprehensiveAnalyzer {
             results.len()
         );
 
-        AnalysisResult::new(deduplicated, hypothesis, avg_confidence, &combined_description)
+        AnalysisResult::new(
+            deduplicated,
+            hypothesis,
+            avg_confidence,
+            &combined_description,
+        )
     }
 
     /// Generate a comprehensive structure hypothesis
@@ -111,28 +111,39 @@ impl ComprehensiveAnalyzer {
         let mut result = String::new();
 
         // Check if first match is an enum variant
-        let is_enum = matches.first()
+        let is_enum = matches
+            .first()
             .map(|m| m.pattern_name == "EnumVariant")
             .unwrap_or(false);
 
         if is_enum {
             let variant = matches.first().unwrap();
-            result.push_str(&format!("enum BorshEnum {{\n    Variant{}, // {}\n    // Other variants\n}}\n\n",
-                                     variant.data.first().unwrap_or(&0), variant.interpretation));
+            result.push_str(&format!(
+                "enum BorshEnum {{\n    Variant{}, // {}\n    // Other variants\n}}\n\n",
+                variant.data.first().unwrap_or(&0),
+                variant.interpretation
+            ));
 
             result.push_str("struct VariantData {\n");
 
             // Skip the enum variant itself in the struct fields
             for (i, m) in matches.iter().enumerate().skip(1) {
-                result.push_str(&format!("    field_{}: {}, // {} (confidence: {}%)\n",
-                                         i - 1, m.pattern_name, m.interpretation, m.confidence));
+                result.push_str(&format!(
+                    "    field_{}: {}, // {} (confidence: {}%)\n",
+                    i - 1,
+                    m.pattern_name,
+                    m.interpretation,
+                    m.confidence
+                ));
             }
         } else {
             result.push_str("struct BorshStructure {\n");
 
             for (i, m) in matches.iter().enumerate() {
-                result.push_str(&format!("    field_{}: {}, // {} (confidence: {}%)\n",
-                                         i, m.pattern_name, m.interpretation, m.confidence));
+                result.push_str(&format!(
+                    "    field_{}: {}, // {} (confidence: {}%)\n",
+                    i, m.pattern_name, m.interpretation, m.confidence
+                ));
             }
         }
 
@@ -145,7 +156,10 @@ impl ComprehensiveAnalyzer {
         if is_enum {
             result.push_str("enum BorshEnum {\n");
             let variant = matches.first().unwrap();
-            result.push_str(&format!("    Variant{}(VariantData),\n", variant.data.first().unwrap_or(&0)));
+            result.push_str(&format!(
+                "    Variant{}(VariantData),\n",
+                variant.data.first().unwrap_or(&0)
+            ));
             result.push_str("    // Other variants\n");
             result.push_str("}\n\n");
 
@@ -161,7 +175,7 @@ impl ComprehensiveAnalyzer {
                     "bool" => "bool",
                     "Vec<u8>" => "Vec<u8>",
                     "Option::Some" | "Option::None" => "Option<T>",
-                    _ => "/* unknown type */"
+                    _ => "/* unknown type */",
                 };
 
                 result.push_str(&format!("    field_{}: {},\n", i - 1, rust_type));
@@ -178,7 +192,7 @@ impl ComprehensiveAnalyzer {
                     "bool" => "bool",
                     "Vec<u8>" => "Vec<u8>",
                     "Option::Some" | "Option::None" => "Option<T>",
-                    _ => "/* unknown type */"
+                    _ => "/* unknown type */",
                 };
 
                 result.push_str(&format!("    field_{}: {},\n", i, rust_type));
@@ -200,12 +214,17 @@ impl BorshAnalyzer for ComprehensiveAnalyzer {
         "Combines pattern matching, recursive analysis, and probabilistic analysis for the most comprehensive results"
     }
 
-    fn analyze(&self, data: &[u8], dictionary: &PatternDictionary, options: &AnalysisOptions) -> AnalysisResult {
+    fn analyze(
+        &self,
+        data: &[u8],
+        dictionary: &PatternDictionary,
+        options: &AnalysisOptions,
+    ) -> AnalysisResult {
         // First use the composite analyzer to run all analyzers
         let results = vec![
             pattern::PatternAnalyzer::new().analyze(data, dictionary, options),
             recursive::RecursiveAnalyzer::new().analyze(data, dictionary, options),
-            probabilistic::ProbabilisticAnalyzer::new().analyze(data, dictionary, options)
+            probabilistic::ProbabilisticAnalyzer::new().analyze(data, dictionary, options),
         ];
 
         // Then use custom merging logic

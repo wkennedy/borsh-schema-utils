@@ -1,6 +1,6 @@
 // src/core/types.rs
-use std::fmt;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
 
 // Define a struct without the function pointer for serialization purposes
 #[derive(Serialize, Deserialize)]
@@ -36,7 +36,7 @@ impl BorshPattern {
         binary_pattern: Vec<u8>,
         mask: Vec<u8>,
         example: &str,
-        matcher: fn(&[u8]) -> Option<String>
+        matcher: fn(&[u8]) -> Option<String>,
     ) -> Self {
         Self {
             name: name.to_string(),
@@ -110,7 +110,13 @@ fn get_matcher_for_pattern(name: &str) -> fn(&[u8]) -> Option<String> {
     // This would need to be populated with all your pattern matchers
     match name {
         // For example only - you would need to define these functions elsewhere
-        "u8" => |bytes| if !bytes.is_empty() { Some(format!("u8: {}", bytes[0])) } else { None },
+        "u8" => |bytes| {
+            if !bytes.is_empty() {
+                Some(format!("u8: {}", bytes[0]))
+            } else {
+                None
+            }
+        },
         "String" => |bytes| {
             if bytes.len() >= 4 {
                 let len = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
@@ -298,9 +304,15 @@ impl AnalysisResult {
         };
 
         let avg_confidence = (confidence_sum / results.len() as u32) as u8;
-        let combined_description = format!("Combined analysis results:\n{}", descriptions.join("\n"));
+        let combined_description =
+            format!("Combined analysis results:\n{}", descriptions.join("\n"));
 
-        Self::new(deduplicated, hypothesis, avg_confidence, &combined_description)
+        Self::new(
+            deduplicated,
+            hypothesis,
+            avg_confidence,
+            &combined_description,
+        )
     }
 
     /// Generate a structure hypothesis from matches
@@ -308,7 +320,10 @@ impl AnalysisResult {
         let mut result = String::from("struct BorshStructure {\n");
 
         for (i, m) in matches.iter().enumerate() {
-            result.push_str(&format!("    field_{}: {}, // {}\n", i, m.pattern_name, m.interpretation));
+            result.push_str(&format!(
+                "    field_{}: {}, // {}\n",
+                i, m.pattern_name, m.interpretation
+            ));
         }
 
         result.push_str("}");

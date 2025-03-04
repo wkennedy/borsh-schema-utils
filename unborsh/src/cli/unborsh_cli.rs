@@ -5,7 +5,11 @@ use colored::Colorize;
 use std::fs::File;
 use std::io::{self, Read};
 use std::path::PathBuf;
-use unborsh::{AnalysisOptions, AnalysisResult, AnalysisStrategy, analyze_with_options, interpret_as, pattern_definitions, VisualizationFormat, ColorTheme, VisualizationOptions, visualize_to_file, visualize};
+use unborsh::{
+    analyze_with_options, interpret_as, pattern_definitions, visualize, visualize_to_file,
+    AnalysisOptions, AnalysisResult, AnalysisStrategy, ColorTheme, VisualizationFormat,
+    VisualizationOptions,
+};
 
 #[derive(Parser)]
 #[command(name = "unborsh")]
@@ -140,7 +144,6 @@ enum PatternCategory {
     All,
 }
 
-
 // Define visualization format argument enum
 #[derive(ValueEnum, Copy, Clone, Debug)]
 enum VisualizationFormatArg {
@@ -174,7 +177,6 @@ impl From<ColorThemeArg> for ColorTheme {
         }
     }
 }
-
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
@@ -217,26 +219,41 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Commands::Patterns { category, verbose } => {
             let dictionary = match category {
-                Some(PatternCategory::Primitives) => pattern_definitions::create_primitive_dictionary(),
-                Some(PatternCategory::Collections) => pattern_definitions::create_collection_dictionary(),
+                Some(PatternCategory::Primitives) => {
+                    pattern_definitions::create_primitive_dictionary()
+                }
+                Some(PatternCategory::Collections) => {
+                    pattern_definitions::create_collection_dictionary()
+                }
                 Some(PatternCategory::Complex) => pattern_definitions::create_complex_dictionary(),
-                Some(PatternCategory::Blockchain) => pattern_definitions::create_blockchain_dictionary(),
-                Some(PatternCategory::All) | None => pattern_definitions::create_pattern_dictionary(),
+                Some(PatternCategory::Blockchain) => {
+                    pattern_definitions::create_blockchain_dictionary()
+                }
+                Some(PatternCategory::All) | None => {
+                    pattern_definitions::create_pattern_dictionary()
+                }
             };
 
-            println!("{} {} patterns available:",
-                     dictionary.len(),
-                     category.map_or("Total".to_string(), |c| format!("{:?}", c)));
+            println!(
+                "{} {} patterns available:",
+                dictionary.len(),
+                category.map_or("Total".to_string(), |c| format!("{:?}", c))
+            );
 
             for (i, pattern) in dictionary.get_patterns().iter().enumerate() {
                 if verbose {
-                    println!("\n{}. {} - {}", i + 1, pattern.name.blue().bold(), pattern.description);
+                    println!(
+                        "\n{}. {} - {}",
+                        i + 1,
+                        pattern.name.blue().bold(),
+                        pattern.description
+                    );
                     println!("   Example: {}", pattern.example);
                 } else {
                     println!("{}. {}", i + 1, pattern.name);
                 }
             }
-        },
+        }
         Commands::Visualize {
             input,
             strategy,
@@ -278,7 +295,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let visualization = visualize(&result, &data, viz_format, &viz_options);
                 println!("{}", visualization);
             }
-        },
+        }
     }
 
     Ok(())
@@ -290,7 +307,9 @@ fn read_input(input: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
         let mut buffer = Vec::new();
         io::stdin().read_to_end(&mut buffer)?;
         Ok(buffer)
-    } else if input.starts_with("0x") || (input.len() > 4 && input.chars().all(|c| c.is_ascii_hexdigit())) {
+    } else if input.starts_with("0x")
+        || (input.len() > 4 && input.chars().all(|c| c.is_ascii_hexdigit()))
+    {
         // Handle hex input
         let hex_str = if input.starts_with("0x") {
             &input[2..]
@@ -308,18 +327,24 @@ fn read_input(input: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
 }
 
 fn print_text_output(result: &AnalysisResult) {
-    println!("{} ({}% confidence):", "Analysis Results".green().bold(), result.confidence);
+    println!(
+        "{} ({}% confidence):",
+        "Analysis Results".green().bold(),
+        result.confidence
+    );
     println!("{}", result.description);
 
     if !result.matches.is_empty() {
         println!("\n{}:", "Matches Found".blue().bold());
         for (i, m) in result.matches.iter().enumerate() {
-            println!("  {}. {} at offset {} ({} bytes, {}% confidence)",
-                     (i + 1).to_string().yellow(),
-                     m.pattern_name.green(),
-                     m.offset,
-                     m.length,
-                     m.confidence);
+            println!(
+                "  {}. {} at offset {} ({} bytes, {}% confidence)",
+                (i + 1).to_string().yellow(),
+                m.pattern_name.green(),
+                m.offset,
+                m.length,
+                m.confidence
+            );
             println!("     {}", m.interpretation);
         }
     }
@@ -336,13 +361,18 @@ fn print_json_output(result: &AnalysisResult) {
     let json = serde_json::to_string_pretty(result).unwrap_or_else(|_| {
         serde_json::json!({
             "error": "Failed to serialize result to JSON"
-        }).to_string()
+        })
+        .to_string()
     });
     println!("{}", json);
 }
 
 fn print_hex_output(data: &[u8], result: &AnalysisResult) {
-    println!("{} ({}% confidence):", "Analysis Results".green().bold(), result.confidence);
+    println!(
+        "{} ({}% confidence):",
+        "Analysis Results".green().bold(),
+        result.confidence
+    );
 
     // Create a vector to track which bytes are matched
     let mut byte_matches = vec![None; data.len()];
@@ -405,12 +435,14 @@ fn print_hex_output(data: &[u8], result: &AnalysisResult) {
     if !result.matches.is_empty() {
         println!("\n{}:", "Identified Patterns".blue().bold());
         for (i, m) in result.matches.iter().enumerate() {
-            println!("  {}. {} at 0x{:x}..0x{:x} ({}% confidence)",
-                     (i + 1).to_string().yellow(),
-                     m.pattern_name.green(),
-                     m.offset,
-                     m.offset + m.length,
-                     m.confidence);
+            println!(
+                "  {}. {} at 0x{:x}..0x{:x} ({}% confidence)",
+                (i + 1).to_string().yellow(),
+                m.pattern_name.green(),
+                m.offset,
+                m.offset + m.length,
+                m.confidence
+            );
             println!("     {}", m.interpretation);
         }
     }
@@ -421,12 +453,14 @@ fn print_compact_output(result: &AnalysisResult) {
 
     if !result.matches.is_empty() {
         for m in &result.matches {
-            println!("{}:{:x}:{}:{}:{}%",
-                     m.pattern_name,
-                     m.offset,
-                     m.length,
-                     m.interpretation.replace(':', "\\:"),
-                     m.confidence);
+            println!(
+                "{}:{:x}:{}:{}:{}%",
+                m.pattern_name,
+                m.offset,
+                m.length,
+                m.interpretation.replace(':', "\\:"),
+                m.confidence
+            );
         }
     }
 

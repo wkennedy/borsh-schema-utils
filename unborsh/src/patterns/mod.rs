@@ -5,16 +5,16 @@
 //! This module contains pattern definitions for common Borsh-serialized types.
 //! These patterns are used by the analyzers to identify and interpret binary data.
 
-pub mod primitives;
+pub mod blockchain;
 pub mod collections;
 pub mod complex;
-pub mod blockchain;
+pub mod primitives;
 
 // Public exports
-pub use primitives::*;
+pub use blockchain::*;
 pub use collections::*;
 pub use complex::*;
-pub use blockchain::*;
+pub use primitives::*;
 
 use crate::core::BorshPattern;
 use crate::core::PatternDictionary;
@@ -171,8 +171,12 @@ pub fn create_blockchain_dictionary() -> PatternDictionary {
 }
 
 /// Create a custom dictionary by combining pattern types
-pub fn create_custom_dictionary(include_primitives: bool, include_collections: bool,
-                                include_complex: bool, include_blockchain: bool) -> PatternDictionary {
+pub fn create_custom_dictionary(
+    include_primitives: bool,
+    include_collections: bool,
+    include_complex: bool,
+    include_blockchain: bool,
+) -> PatternDictionary {
     let mut dict = PatternDictionary::new();
 
     if include_primitives {

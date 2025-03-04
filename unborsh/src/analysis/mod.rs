@@ -1,21 +1,16 @@
 // src/analysis/mod.rs
 
-pub mod traits;
-pub mod pattern;
-pub mod recursive;
 pub mod comprehensive;
+pub mod pattern;
 pub mod probabilistic;
+pub mod recursive;
+pub mod traits;
 
 // Re-export analyzer trait
-pub use traits::{BorshAnalyzer};
+pub use traits::BorshAnalyzer;
 
 // Import internal modules
-use crate::core::{
-    AnalysisOptions,
-    AnalysisResult,
-    AnalysisStrategy,
-    PatternDictionary,
-};
+use crate::core::{AnalysisOptions, AnalysisResult, AnalysisStrategy, PatternDictionary};
 
 /// Get an analyzer instance by strategy
 pub fn get_analyzer(strategy: AnalysisStrategy) -> Box<dyn BorshAnalyzer> {
@@ -28,6 +23,10 @@ pub fn get_analyzer(strategy: AnalysisStrategy) -> Box<dyn BorshAnalyzer> {
 }
 
 /// Analyze Borsh-serialized data using the specified strategy
-pub fn analyze(data: &[u8], dictionary: &PatternDictionary, options: &AnalysisOptions) -> AnalysisResult {
+pub fn analyze(
+    data: &[u8],
+    dictionary: &PatternDictionary,
+    options: &AnalysisOptions,
+) -> AnalysisResult {
     get_analyzer(options.strategy).analyze(data, dictionary, options)
 }

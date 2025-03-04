@@ -9,12 +9,15 @@ pub fn extract_strings(data: &[u8]) -> Vec<String> {
 
     while position + 4 <= data.len() {
         let len = u32::from_le_bytes([
-            data[position], data[position+1], data[position+2], data[position+3]
+            data[position],
+            data[position + 1],
+            data[position + 2],
+            data[position + 3],
         ]);
 
         // Check if this could be a valid string length
         if len > 0 && len < 10000 && position + 4 + len as usize <= data.len() {
-            let potential_string = &data[position+4..position+4+len as usize];
+            let potential_string = &data[position + 4..position + 4 + len as usize];
 
             // Try to parse as UTF-8
             if let Ok(s) = std::str::from_utf8(potential_string) {
@@ -144,15 +147,13 @@ pub fn interpret_as_numbers(data: &[u8]) -> Vec<(String, String)> {
     // Try u64
     if data.len() >= 8 {
         let value = u64::from_le_bytes([
-            data[0], data[1], data[2], data[3],
-            data[4], data[5], data[6], data[7],
+            data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
         ]);
         interpretations.push(("u64".to_string(), format!("{}", value)));
 
         // Also try f64
         let f64_value = f64::from_le_bytes([
-            data[0], data[1], data[2], data[3],
-            data[4], data[5], data[6], data[7],
+            data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
         ]);
         if !f64_value.is_nan() && f64_value.abs() < 1_000_000.0 {
             interpretations.push(("f64".to_string(), format!("{}", f64_value)));

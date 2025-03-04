@@ -14,7 +14,7 @@ categories = ["development-tools", "parser-implementations"]
 borsh = "1.5.0"
 hex = "0.4.3"
 chrono = "0.4.31"
-thiserror = "1.0.50"
+
 # CLI dependencies
 clap = { version = "4.4.7", features = ["derive"], optional = true }
 colored = { version = "3.0.0" , optional = true}
@@ -22,7 +22,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.107"
 
 # Optional dependencies
-base64 = { version = "0.21.5", optional = true }
+base64 = { version = "0.21.7", optional = true }
 
 [features]
 default = []

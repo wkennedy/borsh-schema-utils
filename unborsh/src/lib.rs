@@ -46,28 +46,20 @@
 //! ```
 
 // Module declarations
-mod core;
 mod analysis;
+mod core;
 mod patterns;
 mod visualization;
 
 // Public exports
-pub use core::types::{
-    AnalysisOptions,
-    AnalysisStrategy,
-    AnalysisResult,
-    PatternMatch,
-    BorshPattern,
-};
-pub use core::dictionary::PatternDictionary;
-pub use core::utils;
 pub use analysis::traits::BorshAnalyzer;
+pub use core::dictionary::PatternDictionary;
+pub use core::types::{
+    AnalysisOptions, AnalysisResult, AnalysisStrategy, BorshPattern, PatternMatch,
+};
+pub use core::utils;
 pub use visualization::{
-    VisualizationOptions,
-    VisualizationFormat,
-    ColorTheme,
-    visualize,
-    visualize_to_file,
+    visualize, visualize_to_file, ColorTheme, VisualizationFormat, VisualizationOptions,
 };
 
 // Re-export patterns module for custom pattern creation
@@ -94,13 +86,18 @@ pub fn analyze_with_strategy(data: &[u8], strategy: AnalysisStrategy) -> Analysi
 }
 
 /// Analyze Borsh-serialized data with a custom pattern dictionary
-pub fn analyze_with_dictionary(data: &[u8], dictionary: &PatternDictionary, options: AnalysisOptions) -> AnalysisResult {
+pub fn analyze_with_dictionary(
+    data: &[u8],
+    dictionary: &PatternDictionary,
+    options: AnalysisOptions,
+) -> AnalysisResult {
     analysis::analyze(data, dictionary, &options)
 }
 
 /// Create a custom analyzer from specific strategies
 pub fn create_custom_analyzer(strategies: Vec<AnalysisStrategy>) -> impl BorshAnalyzer {
-    let analyzers = strategies.into_iter()
+    let analyzers = strategies
+        .into_iter()
         .map(|strategy| analysis::get_analyzer(strategy))
         .collect();
 

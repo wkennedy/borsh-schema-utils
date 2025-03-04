@@ -24,7 +24,7 @@ pub fn create_string_pattern() -> BorshPattern {
                 }
             }
             None
-        }
+        },
     )
 }
 
@@ -56,7 +56,7 @@ pub fn create_vec_pattern() -> BorshPattern {
                 }
             }
             None
-        }
+        },
     )
 }
 
@@ -74,7 +74,7 @@ pub fn create_option_none_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -92,7 +92,7 @@ pub fn create_option_some_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -110,7 +110,7 @@ pub fn create_result_ok_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -128,7 +128,7 @@ pub fn create_result_err_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -147,7 +147,7 @@ pub fn create_hashmap_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -166,7 +166,7 @@ pub fn create_hashset_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -185,7 +185,7 @@ pub fn create_btreemap_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -204,7 +204,7 @@ pub fn create_btreeset_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -226,7 +226,7 @@ pub fn create_array_pattern() -> BorshPattern {
                 }
             }
             None
-        }
+        },
     )
 }
 
@@ -242,6 +242,6 @@ pub fn create_tuple_pattern() -> BorshPattern {
             // Tuples are difficult to detect without context
             // This is more of a placeholder
             Some("Possible tuple of elements".to_string())
-        }
+        },
     )
 }

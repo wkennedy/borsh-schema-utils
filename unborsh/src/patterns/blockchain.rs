@@ -15,16 +15,22 @@ pub fn create_pubkey_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 32 {
                 // Check for high entropy (typical of keys)
-                let unique_bytes = bytes[..32].iter().collect::<std::collections::HashSet<_>>().len();
+                let unique_bytes = bytes[..32]
+                    .iter()
+                    .collect::<std::collections::HashSet<_>>()
+                    .len();
                 if unique_bytes > 20 {
-                    Some(format!("Probable public key: {}", hex::encode(&bytes[..32])))
+                    Some(format!(
+                        "Probable public key: {}",
+                        hex::encode(&bytes[..32])
+                    ))
                 } else {
                     None
                 }
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -39,7 +45,10 @@ pub fn create_signature_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 64 {
                 // Check for high entropy (typical of signatures)
-                let unique_bytes = bytes[..64].iter().collect::<std::collections::HashSet<_>>().len();
+                let unique_bytes = bytes[..64]
+                    .iter()
+                    .collect::<std::collections::HashSet<_>>()
+                    .len();
                 if unique_bytes > 40 {
                     Some(format!("Probable signature: {}", hex::encode(&bytes[..16])))
                 } else {
@@ -48,7 +57,7 @@ pub fn create_signature_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -63,7 +72,10 @@ pub fn create_hash_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 32 {
                 // Check for high entropy (typical of hashes)
-                let unique_bytes = bytes[..32].iter().collect::<std::collections::HashSet<_>>().len();
+                let unique_bytes = bytes[..32]
+                    .iter()
+                    .collect::<std::collections::HashSet<_>>()
+                    .len();
                 if unique_bytes > 20 {
                     Some(format!("Probable hash: {}", hex::encode(&bytes[..32])))
                 } else {
@@ -72,7 +84,7 @@ pub fn create_hash_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -87,8 +99,7 @@ pub fn create_token_amount_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 8 {
                 let amount = u64::from_le_bytes([
-                    bytes[0], bytes[1], bytes[2], bytes[3],
-                    bytes[4], bytes[5], bytes[6], bytes[7],
+                    bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
                 ]);
                 // Common range for token amounts (not too small, not too large)
                 if amount > 1_000 && amount < 1_000_000_000_000_000 {
@@ -99,7 +110,7 @@ pub fn create_token_amount_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -113,11 +124,14 @@ pub fn create_account_discriminator_pattern() -> BorshPattern {
         "Account discriminator",
         |bytes| {
             if bytes.len() >= 8 {
-                Some(format!("Possible account discriminator: {}", hex::encode(&bytes[..8])))
+                Some(format!(
+                    "Possible account discriminator: {}",
+                    hex::encode(&bytes[..8])
+                ))
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -131,11 +145,14 @@ pub fn create_instruction_discriminator_pattern() -> BorshPattern {
         "Instruction discriminator",
         |bytes| {
             if bytes.len() >= 8 {
-                Some(format!("Possible instruction discriminator: {}", hex::encode(&bytes[..8])))
+                Some(format!(
+                    "Possible instruction discriminator: {}",
+                    hex::encode(&bytes[..8])
+                ))
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -149,11 +166,14 @@ pub fn create_program_id_pattern() -> BorshPattern {
         "Program ID",
         |bytes| {
             if bytes.len() >= 32 {
-                Some(format!("Possible program ID: {}", hex::encode(&bytes[..32])))
+                Some(format!(
+                    "Possible program ID: {}",
+                    hex::encode(&bytes[..32])
+                ))
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -168,8 +188,7 @@ pub fn create_timestamp_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 8 {
                 let value = u64::from_le_bytes([
-                    bytes[0], bytes[1], bytes[2], bytes[3],
-                    bytes[4], bytes[5], bytes[6], bytes[7],
+                    bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
                 ]);
 
                 // Check if it's in a reasonable range for Unix timestamps
@@ -190,7 +209,7 @@ pub fn create_timestamp_pattern() -> BorshPattern {
                 }
             }
             None
-        }
+        },
     )
 }
 
@@ -205,16 +224,22 @@ pub fn create_transaction_id_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 32 {
                 // Check for high entropy (typical of transaction IDs)
-                let unique_bytes = bytes[..32].iter().collect::<std::collections::HashSet<_>>().len();
+                let unique_bytes = bytes[..32]
+                    .iter()
+                    .collect::<std::collections::HashSet<_>>()
+                    .len();
                 if unique_bytes > 20 {
-                    Some(format!("Probable transaction ID: {}", hex::encode(&bytes[..32])))
+                    Some(format!(
+                        "Probable transaction ID: {}",
+                        hex::encode(&bytes[..32])
+                    ))
                 } else {
                     None
                 }
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -229,14 +254,13 @@ pub fn create_sequence_number_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 8 {
                 let value = u64::from_le_bytes([
-                    bytes[0], bytes[1], bytes[2], bytes[3],
-                    bytes[4], bytes[5], bytes[6], bytes[7],
+                    bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
                 ]);
                 Some(format!("Possible sequence number: {}", value))
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -253,14 +277,17 @@ pub fn create_address_pattern() -> BorshPattern {
                 // Check for high entropy but not too high (some structure)
                 let unique_bytes = bytes.iter().collect::<std::collections::HashSet<_>>().len();
                 if unique_bytes > bytes.len() / 2 && unique_bytes < bytes.len() * 9 / 10 {
-                    Some(format!("Possible blockchain address: {}", hex::encode(bytes)))
+                    Some(format!(
+                        "Possible blockchain address: {}",
+                        hex::encode(bytes)
+                    ))
                 } else {
                     None
                 }
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -276,22 +303,23 @@ pub fn create_consensus_data_pattern() -> BorshPattern {
             if bytes.len() >= 16 {
                 // Look for timestamp-like value followed by counter and flags
                 let potential_timestamp = u64::from_le_bytes([
-                    bytes[0], bytes[1], bytes[2], bytes[3],
-                    bytes[4], bytes[5], bytes[6], bytes[7],
+                    bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
                 ]);
 
-                let counter = u32::from_le_bytes([
-                    bytes[8], bytes[9], bytes[10], bytes[11],
-                ]);
+                let counter = u32::from_le_bytes([bytes[8], bytes[9], bytes[10], bytes[11]]);
 
-                if potential_timestamp > 1_600_000_000 && potential_timestamp < 3_000_000_000 && counter <
-                    10000 {
-                    return Some(format!("Possible consensus data (timestamp: {}, counter: {})",
-                                        potential_timestamp, counter));
+                if potential_timestamp > 1_600_000_000
+                    && potential_timestamp < 3_000_000_000
+                    && counter < 10000
+                {
+                    return Some(format!(
+                        "Possible consensus data (timestamp: {}, counter: {})",
+                        potential_timestamp, counter
+                    ));
                 }
             }
             None
-        }
+        },
     )
 }
 
@@ -309,12 +337,14 @@ pub fn create_event_data_pattern() -> BorshPattern {
                 let data_len = u32::from_le_bytes([bytes[2], bytes[3], bytes[4], bytes[5]]);
 
                 if data_len as usize + 6 <= bytes.len() && data_len < 10000 {
-                    return Some(format!("Possible event data (type: {}, data: {} bytes)",
-                                        event_type, data_len));
+                    return Some(format!(
+                        "Possible event data (type: {}, data: {} bytes)",
+                        event_type, data_len
+                    ));
                 }
             }
             None
-        }
+        },
     )
 }
 
@@ -332,14 +362,19 @@ pub fn create_nft_metadata_pattern() -> BorshPattern {
                 if let Some(str_len) = try_extract_string_length(&bytes[0..]) {
                     if str_len > 2 && str_len < 100 && bytes.len() >= 4 + str_len as usize {
                         // Try to extract what might be a name field
-                        if let Ok(str_content) = std::str::from_utf8(&bytes[4..4 + str_len as usize]) {
-                            return Some(format!("Possible NFT metadata with name: \"{}\"", str_content));
+                        if let Ok(str_content) =
+                            std::str::from_utf8(&bytes[4..4 + str_len as usize])
+                        {
+                            return Some(format!(
+                                "Possible NFT metadata with name: \"{}\"",
+                                str_content
+                            ));
                         }
                     }
                 }
             }
             None
-        }
+        },
     )
 }
 
@@ -375,7 +410,8 @@ pub fn create_solana_account_pattern() -> BorshPattern {
                     // Look for authority (pubkey) after discriminator
                     let potential_pubkey = &bytes[8..40];
 
-                    let unique_bytes = potential_pubkey.iter()
+                    let unique_bytes = potential_pubkey
+                        .iter()
                         .collect::<std::collections::HashSet<_>>()
                         .len();
 
@@ -388,10 +424,13 @@ pub fn create_solana_account_pattern() -> BorshPattern {
                     }
                 }
 
-                Some(format!("Possible Solana account (discriminator: {})", hex::encode(discrim)))
+                Some(format!(
+                    "Possible Solana account (discriminator: {})",
+                    hex::encode(discrim)
+                ))
             } else {
                 None
             }
-        }
+        },
     )
 }

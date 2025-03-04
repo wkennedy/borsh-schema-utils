@@ -37,7 +37,9 @@ impl PatternDictionary {
 
     /// Get a pattern by name
     pub fn get_pattern_by_name(&self, name: &str) -> Option<&BorshPattern> {
-        self.pattern_map.get(name).map(|&index| &self.patterns[index])
+        self.pattern_map
+            .get(name)
+            .map(|&index| &self.patterns[index])
     }
 
     /// Get mutable access to a pattern by name
@@ -72,7 +74,7 @@ impl PatternDictionary {
         // In the actual implementation, this would be:
         // use crate::patterns::primitives::*;
         // use crate::patterns::collections::*;
-        // 
+        //
         // dict.add_pattern(create_u8_pattern());
         // dict.add_pattern(create_u16_pattern());
         // etc.
@@ -117,7 +119,11 @@ impl PatternDictionary {
 
 impl fmt::Display for PatternDictionary {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Borsh Pattern Dictionary ({} patterns)", self.patterns.len())?;
+        writeln!(
+            f,
+            "Borsh Pattern Dictionary ({} patterns)",
+            self.patterns.len()
+        )?;
 
         for (i, pattern) in self.patterns.iter().enumerate() {
             if i > 0 {

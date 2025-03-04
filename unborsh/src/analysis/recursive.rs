@@ -1,13 +1,7 @@
 // src/analysis/recursive.rs
-
 use crate::analysis::traits::BorshAnalyzer;
-use crate::core::{
-    AnalysisOptions,
-    AnalysisResult,
-    PatternDictionary,
-    PatternMatch,
-};
-use crate::core::utils::{extract_strings, detect_enum_variant};
+use crate::core::utils::{detect_enum_variant, extract_strings};
+use crate::core::{AnalysisOptions, AnalysisResult, PatternDictionary, PatternMatch};
 
 /// Analyzer that recursively breaks down Borsh data structures
 pub struct RecursiveAnalyzer;
@@ -40,7 +34,11 @@ impl RecursiveAnalyzer {
                 pattern_name: "EnumVariant".to_string(),
                 offset: parent_offset,
                 length: 1,
-                data: if options.include_raw_bytes { vec![variant] } else { Vec::new() },
+                data: if options.include_raw_bytes {
+                    vec![variant]
+                } else {
+                    Vec::new()
+                },
                 interpretation: format!("Enum variant {}", variant),
                 confidence: 80,
             });
@@ -75,7 +73,11 @@ impl RecursiveAnalyzer {
                         pattern_name: "String".to_string(),
                         offset: parent_offset,
                         length: 4 + len as usize,
-                        data: if options.include_raw_bytes { data[..4 + len as usize].to_vec() } else { Vec::new() },
+                        data: if options.include_raw_bytes {
+                            data[..4 + len as usize].to_vec()
+                        } else {
+                            Vec::new()
+                        },
                         interpretation: format!("String: \"{}\"", s),
                         confidence: 90,
                     });
@@ -100,7 +102,11 @@ impl RecursiveAnalyzer {
                     pattern_name: "Vec".to_string(),
                     offset: parent_offset,
                     length: 4 + len as usize,
-                    data: if options.include_raw_bytes { data[..4 + len as usize].to_vec() } else { Vec::new() },
+                    data: if options.include_raw_bytes {
+                        data[..4 + len as usize].to_vec()
+                    } else {
+                        Vec::new()
+                    },
                     interpretation: format!("Vec with {} elements", len),
                     confidence: 80,
                 });
@@ -108,7 +114,11 @@ impl RecursiveAnalyzer {
                 // Try to analyze elements if there are not too many
                 if len > 0 && len <= 20 {
                     // Try to determine element size by looking at content size
-                    let elem_size = if len > 0 { content.len() / len as usize } else { 0 };
+                    let elem_size = if len > 0 {
+                        content.len() / len as usize
+                    } else {
+                        0
+                    };
 
                     if elem_size > 0 {
                         for i in 0..len as usize {
@@ -125,7 +135,8 @@ impl RecursiveAnalyzer {
 
                                 // Add element matches with adjusted confidence
                                 for mut match_item in element_matches {
-                                    match_item.confidence = match_item.confidence.saturating_sub(10);
+                                    match_item.confidence =
+                                        match_item.confidence.saturating_sub(10);
                                     matches.push(match_item);
                                 }
                             }
@@ -156,7 +167,11 @@ impl RecursiveAnalyzer {
                 pattern_name: "u32".to_string(),
                 offset: parent_offset,
                 length: 4,
-                data: if options.include_raw_bytes { data[..4].to_vec() } else { Vec::new() },
+                data: if options.include_raw_bytes {
+                    data[..4].to_vec()
+                } else {
+                    Vec::new()
+                },
                 interpretation: format!("u32: {}", u32_value),
                 confidence: 60,
             });
@@ -185,10 +200,16 @@ impl RecursiveAnalyzer {
         // Check if first byte looks like enum variant
         let mut result = String::new();
 
-        if matches.first().map_or(false, |m| m.pattern_name == "EnumVariant") {
+        if matches
+            .first()
+            .map_or(false, |m| m.pattern_name == "EnumVariant")
+        {
             let variant = matches.first().unwrap().interpretation.clone();
-            result.push_str(&format!("enum ProbableEnum {{\n    {}, // {}\n    // Other variants\n}}\n\n",
-                                     matches.first().unwrap().pattern_name, variant));
+            result.push_str(&format!(
+                "enum ProbableEnum {{\n    {}, // {}\n    // Other variants\n}}\n\n",
+                matches.first().unwrap().pattern_name,
+                variant
+            ));
 
             result.push_str("struct EnumData {\n");
         } else {
@@ -196,10 +217,20 @@ impl RecursiveAnalyzer {
         }
 
         // Add fields, skipping the enum variant if present
-        let start_idx = if matches.first().map_or(false, |m| m.pattern_name == "EnumVariant") { 1 } else { 0 };
+        let start_idx = if matches
+            .first()
+            .map_or(false, |m| m.pattern_name == "EnumVariant")
+        {
+            1
+        } else {
+            0
+        };
 
         for (i, m) in matches.iter().enumerate().skip(start_idx) {
-            result.push_str(&format!("    field_{}: {}, // {}\n", i, m.pattern_name, m.interpretation));
+            result.push_str(&format!(
+                "    field_{}: {}, // {}\n",
+                i, m.pattern_name, m.interpretation
+            ));
         }
 
         result.push_str("}");
@@ -216,11 +247,17 @@ impl BorshAnalyzer for RecursiveAnalyzer {
         "Analyzes Borsh data by recursively breaking down structures"
     }
 
-    fn analyze(&self, data: &[u8], dictionary: &PatternDictionary, options: &AnalysisOptions) -> AnalysisResult {
+    fn analyze(
+        &self,
+        data: &[u8],
+        dictionary: &PatternDictionary,
+        options: &AnalysisOptions,
+    ) -> AnalysisResult {
         let matches = self.analyze_recursively(data, dictionary, options, 0, 0);
 
         // Filter matches by confidence threshold
-        let filtered_matches: Vec<_> = matches.into_iter()
+        let filtered_matches: Vec<_> = matches
+            .into_iter()
             .filter(|m| m.confidence >= options.min_confidence)
             .collect();
 
@@ -242,7 +279,10 @@ impl BorshAnalyzer for RecursiveAnalyzer {
             matches: limited_matches,
             structure_hypothesis,
             confidence,
-            description: format!("Recursive analysis found {} structures", limited_matches_len),
+            description: format!(
+                "Recursive analysis found {} structures",
+                limited_matches_len
+            ),
         }
     }
 }

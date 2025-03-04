@@ -14,7 +14,7 @@ pub fn create_u8_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -33,7 +33,7 @@ pub fn create_u16_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -52,7 +52,7 @@ pub fn create_u32_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -67,14 +67,13 @@ pub fn create_u64_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 8 {
                 let value = u64::from_le_bytes([
-                    bytes[0], bytes[1], bytes[2], bytes[3],
-                    bytes[4], bytes[5], bytes[6], bytes[7]
+                    bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
                 ]);
                 Some(format!("u64: {}", value))
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -94,7 +93,7 @@ pub fn create_i8_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -113,7 +112,7 @@ pub fn create_i16_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -132,7 +131,7 @@ pub fn create_i32_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -147,14 +146,13 @@ pub fn create_i64_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 8 {
                 let value = i64::from_le_bytes([
-                    bytes[0], bytes[1], bytes[2], bytes[3],
-                    bytes[4], bytes[5], bytes[6], bytes[7]
+                    bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
                 ]);
                 Some(format!("i64: {}", value))
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -177,7 +175,7 @@ pub fn create_f32_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -192,8 +190,7 @@ pub fn create_f64_pattern() -> BorshPattern {
         |bytes| {
             if bytes.len() >= 8 {
                 let value = f64::from_le_bytes([
-                    bytes[0], bytes[1], bytes[2], bytes[3],
-                    bytes[4], bytes[5], bytes[6], bytes[7]
+                    bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
                 ]);
                 if !value.is_nan() {
                     Some(format!("f64: {}", value))
@@ -203,7 +200,7 @@ pub fn create_f64_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -221,7 +218,7 @@ pub fn create_bool_true_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }
 
@@ -239,6 +236,6 @@ pub fn create_bool_false_pattern() -> BorshPattern {
             } else {
                 None
             }
-        }
+        },
     )
 }

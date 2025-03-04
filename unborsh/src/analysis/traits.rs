@@ -1,10 +1,5 @@
 // src/analysis/traits.rs
-
-use crate::core::{
-    AnalysisOptions,
-    AnalysisResult,
-    PatternDictionary,
-};
+use crate::core::{AnalysisOptions, AnalysisResult, PatternDictionary};
 
 /// Trait for Borsh data analysis algorithms
 pub trait BorshAnalyzer {
@@ -15,7 +10,12 @@ pub trait BorshAnalyzer {
     fn description(&self) -> &'static str;
 
     /// Analyze Borsh-serialized data
-    fn analyze(&self, data: &[u8], dictionary: &PatternDictionary, options: &AnalysisOptions) -> AnalysisResult;
+    fn analyze(
+        &self,
+        data: &[u8],
+        dictionary: &PatternDictionary,
+        options: &AnalysisOptions,
+    ) -> AnalysisResult;
 }
 
 /// A composable analyzer that can be built from multiple sub-analyzers
@@ -27,7 +27,11 @@ pub struct CompositeAnalyzer {
 
 impl CompositeAnalyzer {
     /// Create a new composite analyzer
-    pub fn new(name: &'static str, description: &'static str, analyzers: Vec<Box<dyn BorshAnalyzer>>) -> Self {
+    pub fn new(
+        name: &'static str,
+        description: &'static str,
+        analyzers: Vec<Box<dyn BorshAnalyzer>>,
+    ) -> Self {
         Self {
             name,
             description,
@@ -45,7 +49,12 @@ impl BorshAnalyzer for CompositeAnalyzer {
         self.description
     }
 
-    fn analyze(&self, data: &[u8], dictionary: &PatternDictionary, options: &AnalysisOptions) -> AnalysisResult {
+    fn analyze(
+        &self,
+        data: &[u8],
+        dictionary: &PatternDictionary,
+        options: &AnalysisOptions,
+    ) -> AnalysisResult {
         let mut results = Vec::new();
 
         for analyzer in &self.analyzers {

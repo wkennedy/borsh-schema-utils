@@ -1,9 +1,14 @@
 //examples/basic_usage.rs
 
 use borsh::BorshSerialize;
-use borsh_derive::{BorshDeserialize as BorshSerializeDerive, BorshSerialize as BorshDeserializeDerive};
+use borsh_derive::{
+    BorshDeserialize as BorshSerializeDerive, BorshSerialize as BorshDeserializeDerive,
+};
 use hex;
-use unborsh::{analyze, analyze_with_options, analyze_with_strategy, visualize, AnalysisOptions, AnalysisStrategy, ColorTheme, VisualizationFormat, VisualizationOptions};
+use unborsh::{
+    analyze, analyze_with_options, analyze_with_strategy, visualize, AnalysisOptions,
+    AnalysisStrategy, ColorTheme, VisualizationFormat, VisualizationOptions,
+};
 
 // Example data structures for testing
 #[derive(BorshSerializeDerive, BorshDeserializeDerive, Debug)]
@@ -28,7 +33,7 @@ enum TokenData {
 }
 
 fn main() {
-    println!("Unborsh - Basic Analysis Example");
+    println!("Unborsh - Basic Usage Example");
     println!("==================================\n");
 
     // Create sample data
@@ -60,8 +65,14 @@ fn main() {
 
     // Print hex representation of the serialized data
     println!("Person (Borsh hex): {}", hex::encode(&person_borsh));
-    println!("TokenData::Cryptocurrency (Borsh hex): {}", hex::encode(&token_btc_borsh));
-    println!("TokenData::Stablecoin (Borsh hex): {}", hex::encode(&token_usdt_borsh));
+    println!(
+        "TokenData::Cryptocurrency (Borsh hex): {}",
+        hex::encode(&token_btc_borsh)
+    );
+    println!(
+        "TokenData::Stablecoin (Borsh hex): {}",
+        hex::encode(&token_usdt_borsh)
+    );
     println!();
 
     // Analyze person data using default options (Comprehensive strategy)
@@ -111,32 +122,35 @@ fn main() {
         println!("Invalid hex string");
     }
 
-        // Some Borsh-serialized data
-        let data = vec![11, 0, 0, 0, 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100];
-    
-        // Analyze the data
-        let result = analyze(&data);
-    
-        // Create visualization options
-        let viz_options = VisualizationOptions {
-            max_depth: 5,
-            show_interpretations: true,
-            show_confidence: true,
-            show_raw_bytes: true,
-            max_bytes_per_match: 32,
-            theme: ColorTheme::Dark,
-        };
-    
-        // Generate ASCII visualization for terminal display
-        let ascii_viz = visualize(&result, &data, VisualizationFormat::Ascii, &viz_options);
-        println!("{}", ascii_viz);
-    
-        // Generate HTML visualization and save to file
-        unborsh::visualize_to_file(
-            &result,
-            &data,
-            VisualizationFormat::Html,
-            "visualization.html",
-            &viz_options,
-        ).expect("Failed to save visualization");
+    // Some Borsh-serialized data
+    let data = vec![
+        11, 0, 0, 0, 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100,
+    ];
+
+    // Analyze the data
+    let result = analyze(&data);
+
+    // Create visualization options
+    let viz_options = VisualizationOptions {
+        max_depth: 5,
+        show_interpretations: true,
+        show_confidence: true,
+        show_raw_bytes: true,
+        max_bytes_per_match: 32,
+        theme: ColorTheme::Dark,
+    };
+
+    // Generate ASCII visualization for terminal display
+    let ascii_viz = visualize(&result, &data, VisualizationFormat::Ascii, &viz_options);
+    println!("{}", ascii_viz);
+
+    // Generate HTML visualization and save to file
+    unborsh::visualize_to_file(
+        &result,
+        &data,
+        VisualizationFormat::Html,
+        "visualization.html",
+        &viz_options,
+    )
+    .expect("Failed to save visualization");
 }
