@@ -199,7 +199,7 @@ impl Visualizer for HtmlVisualizer {
 fn render_hex_view(
     output: &mut String,
     data: &[u8],
-    offset_map: &HashMap<usize, &PatternMatch>,
+    _offset_map: &HashMap<usize, &PatternMatch>,
     matches: &[PatternMatch],
 ) {
     // Create a map of offsets to pattern matches for coloring

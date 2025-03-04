@@ -194,7 +194,7 @@ pub fn create_timestamp_pattern() -> BorshPattern {
                 // Check if it's in a reasonable range for Unix timestamps
                 // 1600000000 = September 2020, 4000000000 = 2096
                 if value > 1_600_000_000 && value < 4_000_000_000 {
-                    let dt = chrono::NaiveDateTime::from_timestamp_opt(value as i64, 0)
+                    let dt = chrono::DateTime::from_timestamp(value as i64, 0)
                         .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
                         .unwrap_or_else(|| "invalid date".to_string());
                     return Some(format!("Unix timestamp: {} ({})", value, dt));
@@ -202,7 +202,7 @@ pub fn create_timestamp_pattern() -> BorshPattern {
 
                 // Check if it's milliseconds
                 if value > 1_600_000_000_000 && value < 4_000_000_000_000 {
-                    let dt = chrono::NaiveDateTime::from_timestamp_millis(value as i64)
+                    let dt = chrono::DateTime::from_timestamp_millis(value as i64)
                         .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
                         .unwrap_or_else(|| "invalid date".to_string());
                     return Some(format!("Unix timestamp (ms): {} ({})", value, dt));

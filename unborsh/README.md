@@ -134,12 +134,12 @@ let my_pattern = BorshPattern::new(
     }
 );
 
-// Create a dictionary with our pattern
-let mut dictionary = PatternDictionary::new();
-dictionary.add_pattern(my_pattern);
+// Create a _dictionary with our pattern
+let mut _dictionary = PatternDictionary::new();
+_dictionary.add_pattern(my_pattern);
 
-// Analyze with custom dictionary
-let result = analyze_with_dictionary(&data, &dictionary, AnalysisOptions::default());
+// Analyze with custom _dictionary
+let result = analyze_with_dictionary(&data, &_dictionary, AnalysisOptions::default());
 ```
 
 ## Feature Flags

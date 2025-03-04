@@ -269,7 +269,7 @@ impl BorshAnalyzer for ProbabilisticAnalyzer {
     fn analyze(
         &self,
         data: &[u8],
-        dictionary: &PatternDictionary,
+        _dictionary: &PatternDictionary,
         options: &AnalysisOptions,
     ) -> AnalysisResult {
         let mut field_candidates = Vec::new();

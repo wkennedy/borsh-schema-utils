@@ -164,7 +164,7 @@ pub fn interpret_as_numbers(data: &[u8]) -> Vec<(String, String)> {
 }
 
 /// Get a cleaned hexadecimal representation of bytes
-pub fn hex_format(data: &[u8], max_len: usize) -> String {
+pub fn hex_format(data: &[u8], _max_len: usize) -> String {
     if data.is_empty() {
         return "".to_string();
     }
