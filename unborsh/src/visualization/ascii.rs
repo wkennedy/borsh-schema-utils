@@ -2,7 +2,7 @@
 
 //! ASCII-based visualization of Borsh analysis results
 
-use super::{ColorTheme, VisualizationOptions, Visualizer};
+use super::{VisualizationOptions, Visualizer};
 use crate::core::{AnalysisResult, PatternMatch};
 use std::collections::HashMap;
 

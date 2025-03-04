@@ -68,7 +68,7 @@ impl PatternDictionary {
     pub fn from_defaults() -> Self {
         // This is just a placeholder - actual implementation will
         // reference patterns from the patterns module
-        let mut dict = Self::new();
+        let dict = Self::new();
 
         // Placeholder for importing pattern definitions
         // In the actual implementation, this would be:

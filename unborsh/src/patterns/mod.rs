@@ -16,7 +16,6 @@ pub use collections::*;
 pub use complex::*;
 pub use primitives::*;
 
-use crate::core::BorshPattern;
 use crate::core::PatternDictionary;
 
 /// Create a dictionary with all default patterns

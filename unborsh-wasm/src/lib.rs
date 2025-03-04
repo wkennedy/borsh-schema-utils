@@ -9,8 +9,6 @@ use unborsh::{
     AnalysisOptions,
     AnalysisResult,
     PatternMatch,
-    BorshPattern,
-    PatternDictionary,
 };
 
 // Initialize panic hook for better error reporting in browser

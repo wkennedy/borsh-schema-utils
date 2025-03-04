@@ -1,6 +1,6 @@
 // src/analysis/recursive.rs
 use crate::analysis::traits::BorshAnalyzer;
-use crate::core::utils::{detect_enum_variant, extract_strings};
+use crate::core::utils::detect_enum_variant;
 use crate::core::{AnalysisOptions, AnalysisResult, PatternDictionary, PatternMatch};
 
 /// Analyzer that recursively breaks down Borsh data structures

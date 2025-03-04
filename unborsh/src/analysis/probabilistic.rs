@@ -1,6 +1,5 @@
 // src/analysis/probabilistic.rs
 use crate::analysis::traits::BorshAnalyzer;
-use crate::core::utils;
 use crate::core::{AnalysisOptions, AnalysisResult, PatternDictionary, PatternMatch};
 
 /// Analyzer that makes probabilistic guesses about Borsh data structure

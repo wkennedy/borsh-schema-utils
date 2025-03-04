@@ -8,10 +8,8 @@
 mod ascii;
 mod html;
 
-pub use ascii::render_ascii_visualization;
-pub use html::render_html_visualization;
 
-use crate::core::{AnalysisResult, PatternMatch};
+use crate::core::AnalysisResult;
 use std::io::Write;
 
 /// Configuration options for visualization
