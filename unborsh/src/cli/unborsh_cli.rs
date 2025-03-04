@@ -473,3 +473,200 @@ fn print_compact_output(result: &AnalysisResult) {
         println!("Structure: {}", simplified);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+    use unborsh::PatternMatch;
+
+    // Helper function to create a temporary file with content
+    fn create_temp_file(content: &[u8]) -> NamedTempFile {
+        let mut file = NamedTempFile::new().unwrap();
+        file.write_all(content).unwrap();
+        file
+    }
+
+    #[test]
+    fn test_read_input_from_file() {
+        // Create a temporary file with some test data
+        let data = vec![1, 2, 3, 4, 5];
+        let temp_file = create_temp_file(&data);
+        let path = temp_file.path().to_str().unwrap();
+
+        // Test reading from file
+        let result = read_input(path).unwrap();
+        assert_eq!(result, data);
+    }
+
+    #[test]
+    fn test_read_input_from_hex_with_prefix() {
+        // Test hex string with 0x prefix
+        let result = read_input("0x0102030405").unwrap();
+        assert_eq!(result, vec![1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn test_read_input_from_hex_without_prefix() {
+        // Test hex string without 0x prefix
+        let result = read_input("0102030405").unwrap();
+        assert_eq!(result, vec![1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn test_read_input_invalid_hex() {
+        // Test invalid hex string
+        let result = read_input("0x01020Z0405");
+        assert!(result.is_err());
+    }
+
+    // We can't easily test stdin in a unit test, so we'll skip that case
+
+    #[test]
+    fn test_print_text_output() {
+        // Create a simple analysis result
+        let mut matches = Vec::new();
+        matches.push(PatternMatch {
+            pattern_name: "u32".to_string(),
+            offset: 0,
+            length: 4,
+            data: vec![1, 0, 0, 0],
+            interpretation: "u32: 1".to_string(),
+            confidence: 80,
+        });
+        let hypothesis = Some("struct TestStruct {\n    field_0: u32\n}".to_string());
+        let result = AnalysisResult {
+            matches,
+            structure_hypothesis: hypothesis,
+            confidence: 80,
+            description: "Test analysis".to_string(),
+        };
+
+        // This is mostly a visual test - we're just making sure it doesn't panic
+        print_text_output(&result);
+    }
+
+    #[test]
+    fn test_print_json_output() {
+        // Create a simple analysis result
+        let mut matches = Vec::new();
+        matches.push(PatternMatch {
+            pattern_name: "u32".to_string(),
+            offset: 0,
+            length: 4,
+            data: vec![1, 0, 0, 0],
+            interpretation: "u32: 1".to_string(),
+            confidence: 80,
+        });
+        let hypothesis = Some("struct TestStruct {\n    field_0: u32\n}".to_string());
+        let result = AnalysisResult {
+            matches,
+            structure_hypothesis: hypothesis,
+            confidence: 80,
+            description: "Test analysis".to_string(),
+        };
+
+        // This is mostly a visual test - we're just making sure it doesn't panic
+        print_json_output(&result);
+    }
+
+    #[test]
+    fn test_print_hex_output() {
+        // Create a simple analysis result
+        let mut matches = Vec::new();
+        matches.push(PatternMatch {
+            pattern_name: "u32".to_string(),
+            offset: 0,
+            length: 4,
+            data: vec![1, 0, 0, 0],
+            interpretation: "u32: 1".to_string(),
+            confidence: 80,
+        });
+        let data = vec![1, 0, 0, 0, 65, 66, 67, 68]; // 1 as u32 followed by "ABCD"
+        let result = AnalysisResult {
+            matches,
+            structure_hypothesis: None,
+            confidence: 80,
+            description: "Test analysis".to_string(),
+        };
+
+        // This is mostly a visual test - we're just making sure it doesn't panic
+        print_hex_output(&data, &result);
+    }
+
+    #[test]
+    fn test_print_compact_output() {
+        // Create a simple analysis result
+        let mut matches = Vec::new();
+        matches.push(PatternMatch {
+            pattern_name: "u32".to_string(),
+            offset: 0,
+            length: 4,
+            data: vec![1, 0, 0, 0],
+            interpretation: "u32: 1".to_string(),
+            confidence: 80,
+        });
+        let hypothesis = Some("struct TestStruct {\n    field_0: u32\n}".to_string());
+        let result = AnalysisResult {
+            matches,
+            structure_hypothesis: hypothesis,
+            confidence: 80,
+            description: "Test analysis".to_string(),
+        };
+
+        // This is mostly a visual test - we're just making sure it doesn't panic
+        print_compact_output(&result);
+    }
+
+    #[test]
+    fn test_strategy_arg_conversion() {
+        assert_eq!(
+            AnalysisStrategy::from(StrategyArg::Pattern),
+            AnalysisStrategy::Pattern
+        );
+        assert_eq!(
+            AnalysisStrategy::from(StrategyArg::Recursive),
+            AnalysisStrategy::Recursive
+        );
+        assert_eq!(
+            AnalysisStrategy::from(StrategyArg::Probabilistic),
+            AnalysisStrategy::Probabilistic
+        );
+        assert_eq!(
+            AnalysisStrategy::from(StrategyArg::Comprehensive),
+            AnalysisStrategy::Comprehensive
+        );
+    }
+
+    #[test]
+    fn test_visualization_format_conversion() {
+        assert_eq!(
+            VisualizationFormat::from(VisualizationFormatArg::Ascii),
+            VisualizationFormat::Ascii
+        );
+        assert_eq!(
+            VisualizationFormat::from(VisualizationFormatArg::Html),
+            VisualizationFormat::Html
+        );
+    }
+
+    #[test]
+    fn test_color_theme_conversion() {
+        assert_eq!(
+            ColorTheme::from(ColorThemeArg::Light),
+            ColorTheme::Light
+        );
+        assert_eq!(
+            ColorTheme::from(ColorThemeArg::Dark),
+            ColorTheme::Dark
+        );
+        assert_eq!(
+            ColorTheme::from(ColorThemeArg::HighContrast),
+            ColorTheme::HighContrast
+        );
+    }
+
+    // Testing the main function and Commands handling would require more complex integration tests
+    // which are better suited for separate integration test files
+}

@@ -23,6 +23,7 @@ serde_json = "1.0.107"
 
 # Optional dependencies
 base64 = { version = "0.21.7", optional = true }
+tempfile = "3.17.1"
 
 [features]
 default = []
