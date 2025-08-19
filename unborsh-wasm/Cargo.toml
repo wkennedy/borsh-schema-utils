@@ -1,0 +1,36 @@
+[package]
+name = "unborsh-wasm"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "WebAssembly bindings for unborsh library"
+repository = "https://github.com/yourusername/unborsh"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = "0.2.100"
+js-sys = "0.3.67"
+wasm-bindgen-futures = "0.4.40"
+console_error_panic_hook = "0.1.7"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.139"
+borsh = "1.5.0"
+hex = "0.4.3"
+chrono = "0.4.31"
+
+# Add unborsh as a path dependency (for local development)
+# When publishing, you'll want to use a version number instead
+unborsh = { path = "../unborsh" }
+base64 = "0.21.7"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.40"
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+lto = true

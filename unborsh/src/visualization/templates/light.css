@@ -1,0 +1,251 @@
+/* Light theme for Borsh Structure Visualization */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.header {
+    background-color: #2196F3;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #1976D2;
+    color: white;
+}
+
+.header h1 {
+    margin: 0;
+}
+
+.info {
+    font-size: 14px;
+    margin: 5px 0;
+    opacity: 0.9;
+}
+
+.description {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h2 {
+    color: #1976D2;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.structure-diagram, .structure-hypothesis, .hex-view {
+    background-color: #fff;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.tree-container {
+    margin-left: 10px;
+}
+
+.tree-node {
+    margin-bottom: 10px;
+    border-left: 2px solid #ddd;
+    padding-left: 15px;
+    position: relative;
+    overflow: hidden;
+    max-height: 32px;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.tree-node:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 15px;
+    width: 10px;
+    height: 2px;
+    background-color: #ddd;
+}
+
+.tree-node.expanded {
+    max-height: 500px;
+}
+
+.node-header {
+    cursor: pointer;
+    font-weight: bold;
+    position: relative;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.node-header:after {
+    content: "▶";
+    position: absolute;
+    right: 10px;
+    color: #888;
+    transform: rotate(0deg);
+    transition: transform 0.2s;
+}
+
+.tree-node.expanded .node-header:after {
+    transform: rotate(90deg);
+}
+
+.node-content {
+    padding: 5px 10px;
+    margin-left: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.interpretation {
+    margin-bottom: 5px;
+}
+
+.confidence {
+    font-style: italic;
+    margin-bottom: 5px;
+}
+
+.raw-bytes {
+    font-family: 'Consolas', 'Courier New', monospace;
+    word-break: break-all;
+    margin-bottom: 5px;
+    background-color: #f8f8f8;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+.bytes-more {
+    color: #999;
+    font-style: italic;
+}
+
+.offset-info {
+    color: #888;
+    font-size: 12px;
+}
+
+/* Confidence levels styling */
+.high-confidence {
+    border-left-color: #4CAF50;
+}
+
+.high-confidence .node-header {
+    color: #2E7D32;
+}
+
+.good-confidence {
+    border-left-color: #8BC34A;
+}
+
+.good-confidence .node-header {
+    color: #558B2F;
+}
+
+.medium-confidence {
+    border-left-color: #FFC107;
+}
+
+.medium-confidence .node-header {
+    color: #FF8F00;
+}
+
+.low-confidence {
+    border-left-color: #FF9800;
+}
+
+.low-confidence .node-header {
+    color: #EF6C00;
+}
+
+.very-low-confidence {
+    border-left-color: #F44336;
+}
+
+.very-low-confidence .node-header {
+    color: #C62828;
+}
+
+/* Hex view styling */
+.hex-table {
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.hex-table th, .hex-table td {
+    padding: 5px;
+    text-align: center;
+    border: 1px solid #eee;
+}
+
+.hex-table th {
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+.offset {
+    color: #1976D2;
+    background-color: #f8f8f8;
+}
+
+.hex-byte {
+    background-color: #fff;
+    color: #333;
+}
+
+.separator {
+    width: 10px;
+    background-color: #f5f5f5;
+    border: none;
+}
+
+.hex-byte.high-confidence { background-color: #E8F5E9; color: #2E7D32; }
+.hex-byte.good-confidence { background-color: #F1F8E9; color: #558B2F; }
+.hex-byte.medium-confidence { background-color: #FFF8E1; color: #FF8F00; }
+.hex-byte.low-confidence { background-color: #FFF3E0; color: #EF6C00; }
+.hex-byte.very-low-confidence { background-color: #FFEBEE; color: #C62828; }
+
+.ascii {
+    text-align: left;
+    padding-left: 10px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    background-color: #fafafa;
+}
+
+.ascii span.high-confidence { color: #2E7D32; font-weight: bold; }
+.ascii span.good-confidence { color: #558B2F; font-weight: bold; }
+.ascii span.medium-confidence { color: #FF8F00; font-weight: bold; }
+.ascii span.low-confidence { color: #EF6C00; font-weight: bold; }
+.ascii span.very-low-confidence { color: #C62828; font-weight: bold; }
+
+/* Structure hypothesis styling */
+.structure-hypothesis pre {
+    background-color: #f8f8f8;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 0;
+    border: 1px solid #eee;
+}
+
+.structure-hypothesis code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    color: #333;
+}
+
+.byte {
+    display: inline-block;
+    padding: 2px;
+}
