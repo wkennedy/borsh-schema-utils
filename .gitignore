@@ -1,3 +1,6 @@
 Cargo.lock
 target
 .idea
+
+/unborsh-ui/node_modules/
+/unborsh-wasm/node_modules/
